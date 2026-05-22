@@ -1,0 +1,69 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "experiment.schema.json",
+  "title": "DGM Experiment Goal — A/B Testing Context",
+  "description": "Tracks A/B test context for tool invocations. All fields optional; the entire 'experiment' key is omitted for non-experimental calls. Signals carry 1.5x weight in KOTH ELO calculations due to controlled conditions.",
+  "type": "object",
+  "properties": {
+    "template_id": {
+      "type": ["string", "null"],
+      "description": "Named question/invocation template identifier (e.g., 'arch-decision-v1'). Enables grouping 'same question, different variants' for A/B analysis. Null for ad-hoc calls.",
+      "examples": ["arch-decision-v1", "feature-selection-v2", null]
+    },
+    "template_version": {
+      "type": ["string", "null"],
+      "description": "Semver of the template (e.g., '1.2.0'). Bump to test revised option framing, ordering, or presentation. Null for ad-hoc calls.",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$",
+      "examples": ["1.2.0", "2.0.1", null]
+    },
+    "experiment_id": {
+      "type": ["string", "null"],
+      "description": "Active A/B experiment this call participates in (e.g., 'exp-markdown-preview-2026-02'). Maps to source_weights.ab_testing in KOTH config (1.5x weight). Null if not in an experiment.",
+      "examples": ["exp-markdown-preview-2026-02", "exp-agent-selector-ui-v3", null]
+    },
+    "variant_id": {
+      "type": ["string", "null"],
+      "description": "Which variant within the experiment (e.g., 'markdown-enabled' vs 'text-only'). Used to partition outcomes by treatment group. Null if not in an experiment.",
+      "examples": ["markdown-enabled", "text-only", "oracle-guided", "random", null]
+    },
+    "assignment_method": {
+      "type": ["string", "null"],
+      "description": "How the variant was selected. Optional metadata for reproducibility.",
+      "enum": ["random", "deterministic", "oracle_guided", null],
+      "examples": ["random", "deterministic", "oracle_guided", null]
+    },
+    "treatment_group": {
+      "type": ["string", "null"],
+      "description": "Treatment classification: 'control' (baseline) or 'treatment' (experimental). Optional when variant_id is sufficient.",
+      "enum": ["control", "treatment", null],
+      "examples": ["control", "treatment", null]
+    }
+  },
+  "additionalProperties": false,
+  "examples": [
+    {
+      "template_id": "arch-decision-v1",
+      "template_version": "1.2.0",
+      "experiment_id": "exp-markdown-preview-2026-02",
+      "variant_id": "markdown-enabled",
+      "assignment_method": "random",
+      "treatment_group": "treatment"
+    },
+    {
+      "template_id": null,
+      "template_version": null,
+      "experiment_id": null,
+      "variant_id": null,
+      "assignment_method": null,
+      "treatment_group": null
+    },
+    {
+      "template_id": "agent-selector-v2",
+      "template_version": "2.1.0",
+      "experiment_id": "exp-oracle-confidence-threshold",
+      "variant_id": "threshold-0.85",
+      "assignment_method": "oracle_guided",
+      "treatment_group": "treatment"
+    }
+  ]
+}

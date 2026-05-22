@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "decision.schema.json",
+  "title": "Decision Logger Join",
+  "description": "Bidirectional join between tool calls and DecisionContext records in <your-decision-store>.jsonl. Enables correlation of tool use with decision outcomes for ELO rating updates.",
+  "type": "object",
+  "properties": {
+    "decision_id": {
+      "type": ["string", "null"],
+      "description": "ID of the DecisionContext that triggered this tool call. Format: dec_YYYYMMDD_HHmmss_NNNNNN. Null if no active decision context. Join key: <your-decision-store>.jsonl[decision_id] ↔ unified-activity.jsonl[metadata.decision.decision_id].",
+      "pattern": "^dec_[0-9]{8}_[0-9]{6}_[0-9]{6}$"
+    },
+    "intent_classification": {
+      "type": ["string", "null"],
+      "description": "Mirrors DecisionContext.intent_classification for quick filtering without joining to decisions file.",
+      "enum": ["exploration", "editing", "review", "planning", "autonomous", null]
+    },
+    "entity_id": {
+      "type": ["string", "null"],
+      "description": "First 8 chars of SHA256(project_path). Matches EntityMemory.entity_id hashing pattern for privacy-preserving project identification. Null if no project context.",
+      "pattern": "^[0-9a-f]{8}$"
+    },
+    "signal_type": {
+      "type": ["string", "null"],
+      "description": "Position of this tool call in the decision lifecycle. pre_decision: tool calls that inform the decision (Read, Grep). post_decision: actions taken after decision (Write, Bash). outcome: result signals (TaskUpdate status=completed).",
+      "enum": ["pre_decision", "post_decision", "outcome", null]
+    },
+    "parent_decision_id": {
+      "type": ["string", "null"],
+      "description": "For nested decisions (subagents spawned by Task calls). Null for top-level decisions. Enables decision tree reconstruction.",
+      "pattern": "^dec_[0-9]{8}_[0-9]{6}_[0-9]{6}$"
+    },
+    "decision_domain": {
+      "type": ["string", "null"],
+      "description": "Domain classification for routing decision outcomes to KOTH subcategories. Null if unclassified.",
+      "enum": ["frontend", "backend", "devops", "planning", "tooling", "data", "security", "cross_cutting", null]
+    }
+  },
+  "additionalProperties": false,
+  "examples": [
+    {
+      "decision_id": "dec_20260219_143022_123456",
+      "intent_classification": "editing",
+      "entity_id": "a3f9b2c1",
+      "signal_type": "post_decision",
+      "parent_decision_id": null,
+      "decision_domain": "backend"
+    },
+    {
+      "decision_id": null,
+      "intent_classification": null,
+      "entity_id": null,
+      "signal_type": null,
+      "parent_decision_id": null,
+      "decision_domain": null
+    },
+    {
+      "decision_id": "dec_20260219_150815_789012",
+      "intent_classification": "autonomous",
+      "entity_id": "b7e4d3a2",
+      "signal_type": "outcome",
+      "parent_decision_id": "dec_20260219_143022_123456",
+      "decision_domain": "tooling"
+    }
+  ]
+}

@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "task.schema.json",
+  "title": "Task Metadata — Tier 1 (Full)",
+  "description": "Full 5-goal metadata for the Task tool (subagent spawner). The agent type passed to Task is the primary KOTH signal: koth.agents_in_options should contain the agent being spawned. Oracle should be consulted before choosing the agent type. outcome_signal is set PostToolUse when the subagent completes.",
+  "allOf": [{ "$ref": "../base/base-metadata.schema.json" }],
+  "required": ["source", "provenance", "koth", "decision"],
+  "notes": {
+    "koth.agents_in_options": "Single-element array containing the subagent_type being spawned. PostToolUse sets outcome_signal based on subagent success/failure.",
+    "koth.oracle_consulted": "Should be true — callers should consult Oracle before picking an agent type.",
+    "decision.parent_decision_id": "Set when this Task call is spawned by an existing decision context (e.g., orchestrator decision → researcher subagent).",
+    "decision.signal_type": "Typically 'post_decision' — the agent selection decision was already made before calling Task."
+  },
+  "examples": [
+    {
+      "source": "main:orchestrator",
+      "provenance": {
+        "session_id": "123e4567-e89b-12d3-a456-426614174000",
+        "agent_id": null,
+        "caller_type": "main",
+        "caller_name": "orchestrator",
+        "caller_chain": [],
+        "project_path_hash": "a3f9b2c1",
+        "timestamp_utc": "2026-02-19T14:35:00.000000Z"
+      },
+      "koth": {
+        "oracle_consulted": true,
+        "oracle_recommended_agent": "Explore",
+        "oracle_recommendation_confidence": 0.91,
+        "agents_in_options": ["Explore"],
+        "koth_domain": "planning",
+        "outcome_signal": "pending",
+        "question_type": null
+      },
+      "decision": {
+        "decision_id": "dec_20260219_143500_001000",
+        "intent_classification": "exploration",
+        "entity_id": "a3f9b2c1",
+        "signal_type": "post_decision",
+        "parent_decision_id": null,
+        "decision_domain": "tooling"
+      }
+    }
+  ]
+}

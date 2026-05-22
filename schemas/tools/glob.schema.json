@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "glob.schema.json",
+  "title": "Glob Metadata — Tier 3 (Minimal)",
+  "description": "Minimal metadata for the Glob tool (file pattern matching). Only source and provenance are carried.",
+  "allOf": [{ "$ref": "../base/base-metadata.schema.json" }],
+  "required": ["source", "provenance"],
+  "notes": {
+    "provenance": "Only session_id, caller_type, caller_name required. Omit optional fields for Tier 3.",
+    "koth": "NOT applicable — omit.",
+    "decision": "NOT applicable — omit.",
+    "experiment": "NOT applicable — omit."
+  }
+}

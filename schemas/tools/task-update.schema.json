@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "task-update.schema.json",
+  "title": "TaskUpdate Metadata — Tier 3 (Minimal, special nesting)",
+  "description": "Minimal metadata for the TaskUpdate tool. IMPORTANT: TaskUpdate already uses a 'metadata' parameter as an arbitrary user-data object. DGM metadata MUST be nested under the '_dgm' key within that existing metadata object. Same collision avoidance pattern as TaskCreate.",
+  "allOf": [{ "$ref": "../base/base-metadata.schema.json" }],
+  "required": ["source", "provenance"],
+  "notes": {
+    "nesting_collision": "Same as task-create.schema.json — DGM goes in metadata._dgm.",
+    "merge_semantics": "TaskUpdate uses merge semantics for metadata — setting _dgm key won't overwrite other metadata keys.",
+    "koth": "NOT applicable — omit.",
+    "decision": "NOT applicable — omit."
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "skill.schema.json",
+  "title": "Skill Metadata — Tier 1 (Full)",
+  "description": "Full 5-goal metadata for the Skill tool (skill invocation). The skill name is the primary KOTH signal. koth.agents_in_options should contain the skill being invoked (using skill FQN format). Oracle should be consulted when multiple skills could satisfy the request.",
+  "allOf": [{ "$ref": "../base/base-metadata.schema.json" }],
+  "required": ["source", "provenance", "koth", "decision"],
+  "notes": {
+    "koth.agents_in_options": "Skill FQN being invoked (e.g., 'feature-dev:feature-dev'). Single-element when no choice was made.",
+    "koth.oracle_consulted": "Set true when Oracle was queried to select between competing skills.",
+    "source": "Format: 'main:orchestrator' or 'agent:{agent_type}' depending on what invoked the skill."
+  },
+  "examples": [
+    {
+      "source": "main:orchestrator",
+      "provenance": {
+        "session_id": "123e4567-e89b-12d3-a456-426614174000",
+        "agent_id": null,
+        "caller_type": "main",
+        "caller_name": "orchestrator",
+        "caller_chain": [],
+        "project_path_hash": "a3f9b2c1",
+        "timestamp_utc": "2026-02-19T14:36:00.000000Z"
+      },
+      "koth": {
+        "oracle_consulted": false,
+        "oracle_recommended_agent": null,
+        "oracle_recommendation_confidence": null,
+        "agents_in_options": ["feature-dev:feature-dev"],
+        "koth_domain": "planning",
+        "outcome_signal": "pending",
+        "question_type": null
+      },
+      "decision": {
+        "decision_id": "dec_20260219_143600_002000",
+        "intent_classification": "planning",
+        "entity_id": "a3f9b2c1",
+        "signal_type": "post_decision",
+        "parent_decision_id": null,
+        "decision_domain": "tooling"
+      }
+    }
+  ]
+}

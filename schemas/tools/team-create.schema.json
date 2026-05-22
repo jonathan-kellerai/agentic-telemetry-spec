@@ -1,0 +1,9 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "team-create.schema.json",
+  "title": "TeamCreate Metadata — Tier 3 (Minimal)",
+  "description": "Minimal metadata for the TeamCreate tool. Only source and provenance are carried. For high-signal team creation (e.g., choosing team architecture), consider Tier 2 koth/decision fields.",
+  "allOf": [{ "$ref": "../base/base-metadata.schema.json" }],
+  "required": ["source", "provenance"],
+  "notes": { "koth": "NOT applicable by default.", "decision": "NOT applicable by default." }
+}

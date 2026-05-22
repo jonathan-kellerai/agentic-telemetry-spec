@@ -1,0 +1,43 @@
+# Claude Code local config
+.claude/
+
+# Staging artifacts (not for public release)
+.claude-tmp/
+STAGING-NOTES.md
+KICKOFF-PROMPT.md
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Python
+__pycache__/
+*.py[cod]
+.ruff_cache/
+.mypy_cache/
+.pytest_cache/
+
+# Node.js
+node_modules/
+
+# Environment
+.env
+.env.*
+
+# Logs
+*.log
+
+# Build artifacts
+dist/
+build/
+*.egg-info/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# IP-leak audit — excluded from publication
+docs/codebase-atlas.html

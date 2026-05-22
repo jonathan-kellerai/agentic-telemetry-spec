@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "read.schema.json",
+  "title": "Read Metadata — Tier 3 (Minimal)",
+  "description": "Minimal metadata for the Read tool. Only source and provenance are carried. Read is a high-frequency, low-signal tool — full metadata would bloat telemetry. Provenance tracks which session/agent issued the read for audit purposes.",
+  "allOf": [{ "$ref": "../base/base-metadata.schema.json" }],
+  "required": ["source", "provenance"],
+  "notes": {
+    "provenance": "Only the 3 required fields are needed: session_id, caller_type, caller_name. Omit caller_chain, project_path_hash, timestamp_utc for Tier 3 to minimize payload.",
+    "koth": "NOT applicable — omit entirely.",
+    "decision": "NOT applicable — omit entirely.",
+    "experiment": "NOT applicable — omit entirely."
+  }
+}

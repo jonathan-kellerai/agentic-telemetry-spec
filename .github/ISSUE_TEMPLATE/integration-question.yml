@@ -1,0 +1,42 @@
+name: Integration question
+description: Ask how to wire the dgm-telemetry schemas into your telemetry pipeline or agent build.
+title: "[integration] "
+labels: ["question", "integration"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this for questions about integrating the dgm-telemetry metadata
+        schemas into your own `<your-telemetry-ingestor>`, ELO engine, A/B
+        runner, or decision store. For defects in the schemas themselves, use
+        the schema-bug template instead.
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Your context
+      description: >
+        What kind of pipeline are you integrating (language, framework,
+        telemetry store)? Which tool tier (Tier 1 / 2 / 3) and which
+        design goals are you targeting?
+      placeholder: "A Python PostToolUse hook writing to JSONL; targeting Tier 2 tools with provenance + KOTH goals."
+    validations:
+      required: true
+
+  - type: textarea
+    id: question
+    attributes:
+      label: Your question
+      placeholder: "The koth.outcome_signal field is undefined for Write/Edit tools — what value should my hook write?"
+    validations:
+      required: true
+
+  - type: textarea
+    id: reading
+    attributes:
+      label: What have you already read?
+      description: >
+        Optional — which docs you have already consulted (README, AGENTS.md,
+        docs/design-goals.md, the relevant goal companion doc, etc.).
+    validations:
+      required: false

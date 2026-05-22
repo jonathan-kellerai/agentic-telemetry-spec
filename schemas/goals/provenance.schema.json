@@ -1,0 +1,119 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "provenance.schema.json",
+  "title": "DGM Provenance",
+  "description": "Caller identity chain for tool call traceability: session → agent → skill/hook → tool. Present on all tiers.",
+  "type": "object",
+  "properties": {
+    "session_id": {
+      "type": "string",
+      "description": "UUID of the Claude Code session. Matches session_id in <your-telemetry-ingestor> _base_record().",
+      "format": "uuid",
+      "examples": ["123e4567-e89b-12d3-a456-426614174000"]
+    },
+    "agent_id": {
+      "type": ["string", "null"],
+      "description": "UUID of the spawned subagent instance. Null for main orchestrator. Matches agent_id in SubagentStart/Stop events.",
+      "format": "uuid",
+      "examples": ["ae02e3e1-4f7b-4d9c-8cc8-1a2b3c4d5e6f", null]
+    },
+    "caller_type": {
+      "type": "string",
+      "description": "Type of the immediate caller.",
+      "enum": ["skill", "agent", "hook", "main"],
+      "examples": ["skill", "agent", "hook", "main"]
+    },
+    "caller_name": {
+      "type": "string",
+      "description": "Fully-qualified name of the immediate caller. Format varies by caller_type: 'plugin:skill' for skills, 'agent-type' for agents, 'HookEventName' for hooks, 'orchestrator' for main.",
+      "examples": [
+        "feature-dev:feature-dev",
+        "code-architect",
+        "UserPromptSubmit",
+        "orchestrator"
+      ]
+    },
+    "caller_chain": {
+      "type": "array",
+      "description": "Parent callers from outermost to immediate. Each item represents a caller in the invocation chain. Empty array for top-level calls.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "caller_type": {
+            "type": "string",
+            "enum": ["skill", "agent", "hook", "main"]
+          },
+          "caller_name": {
+            "type": "string"
+          },
+          "agent_id": {
+            "type": ["string", "null"],
+            "format": "uuid"
+          }
+        },
+        "required": ["caller_type", "caller_name"],
+        "additionalProperties": false
+      },
+      "default": [],
+      "examples": [
+        [],
+        [
+          {
+            "caller_type": "agent",
+            "caller_name": "code-architect",
+            "agent_id": "ae02e3e1-4f7b-4d9c-8cc8-1a2b3c4d5e6f"
+          }
+        ]
+      ]
+    },
+    "project_path_hash": {
+      "type": ["string", "null"],
+      "description": "First 8 characters of SHA256(project_path). Enables entity memory joins without exposing absolute paths in telemetry. Matches EntityMemory.entity_id hashing pattern in <your-decision-store>.py.",
+      "pattern": "^[0-9a-f]{8}$",
+      "examples": ["a3f9b2c1", null]
+    },
+    "timestamp_utc": {
+      "type": ["string", "null"],
+      "description": "ISO 8601 datetime when the tool was called (UTC timezone).",
+      "format": "date-time",
+      "examples": ["2026-02-19T14:30:22.123456Z", null]
+    }
+  },
+  "required": ["session_id", "caller_type", "caller_name"],
+  "additionalProperties": false,
+  "examples": [
+    {
+      "session_id": "123e4567-e89b-12d3-a456-426614174000",
+      "agent_id": null,
+      "caller_type": "skill",
+      "caller_name": "feature-dev:feature-dev",
+      "caller_chain": [],
+      "project_path_hash": "a3f9b2c1",
+      "timestamp_utc": "2026-02-19T14:30:22.123456Z"
+    },
+    {
+      "session_id": "123e4567-e89b-12d3-a456-426614174000",
+      "agent_id": "ae02e3e1-4f7b-4d9c-8cc8-1a2b3c4d5e6f",
+      "caller_type": "agent",
+      "caller_name": "code-architect",
+      "caller_chain": [
+        {
+          "caller_type": "main",
+          "caller_name": "orchestrator",
+          "agent_id": null
+        }
+      ],
+      "project_path_hash": "a3f9b2c1",
+      "timestamp_utc": "2026-02-19T14:32:15.987654Z"
+    },
+    {
+      "session_id": "f7a3c8d1-2b4e-4a5f-9c8d-7e6f5a4b3c2d",
+      "agent_id": null,
+      "caller_type": "hook",
+      "caller_name": "UserPromptSubmit",
+      "caller_chain": [],
+      "project_path_hash": null,
+      "timestamp_utc": "2026-02-19T15:00:00.000000Z"
+    }
+  ]
+}

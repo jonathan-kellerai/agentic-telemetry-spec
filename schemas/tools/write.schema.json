@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "write.schema.json",
+  "title": "Write Metadata — Tier 2 (Partial)",
+  "description": "Partial metadata for the Write tool (file creation). Provenance is required. koth and decision are optional but recommended for significant file creation events (new feature files, configs, etc.). experiment and _compat not applicable.",
+  "allOf": [{ "$ref": "../base/base-metadata.schema.json" }],
+  "required": ["source", "provenance"],
+  "notes": {
+    "koth.outcome_signal": "Set by PostToolUse. 'win' if file created successfully, 'loss' on error.",
+    "koth.koth_domain": "Domain of the content being written (e.g., 'frontend' for React components, 'backend' for API files).",
+    "decision.signal_type": "Typically 'post_decision' — Write executes on an already-made decision."
+  }
+}

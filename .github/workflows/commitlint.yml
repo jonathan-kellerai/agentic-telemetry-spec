@@ -1,0 +1,31 @@
+name: Commit lint
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  commitlint:
+    name: Validate commit messages (Conventional Commits)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4  # pin to SHA before release
+        with:
+          fetch-depth: 0
+
+      # Requires commitlint.config.js at the repo root (config-conventional
+      # preset). Hard fail — any non-conforming commit message blocks the PR.
+      # See OSS-PUBLICATION-STANDARD.md §4.
+      - name: Validate pull request commit messages
+        run: |
+          npx --yes \
+            --package @commitlint/cli \
+            --package @commitlint/config-conventional \
+            commitlint \
+            --from "${{ github.event.pull_request.base.sha }}" \
+            --to   "${{ github.event.pull_request.head.sha }}" \
+            --verbose

@@ -1,0 +1,59 @@
+name: Schema amendment proposal
+description: Propose a new field, constraint, tool schema, or design-goal change to the specification.
+title: "[amendment] "
+labels: ["amendment", "schema"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this to propose a substantive change to `schemas/`, `docs/`, or
+        `examples/`. All substantive changes require a CHANGELOG entry and a
+        semver classification. See `AGENTS.md` for the semver policy and
+        `docs/agents/conventions.md` for contribution conventions.
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: What do you propose?
+      description: >
+        The new or changed field, constraint, tool schema, or design-goal
+        element — stated precisely. Cite the target file and field path.
+    validations:
+      required: true
+
+  - type: textarea
+    id: rationale
+    attributes:
+      label: Rationale
+      description: >
+        Why is this needed? Cite evidence — a concrete integration gap,
+        a missing provenance signal, a KoTH attribution problem, or a
+        backward-compatibility concern. Use `file:line` citation format.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: semver
+    attributes:
+      label: Semver impact
+      description: >
+        How would this change affect consumers who already validate metadata
+        against these schemas? See AGENTS.md for the semver definitions.
+      options:
+        - "major — removes a required field, changes a field type, or tightens a constraint in a way that breaks existing valid metadata"
+        - "minor — additive, backward-compatible (new optional field, new tool schema, relaxed constraint)"
+        - "patch — clarification, editorial, or docs/examples-only change; no schema behaviour change"
+    validations:
+      required: true
+
+  - type: textarea
+    id: affected-schemas
+    attributes:
+      label: Affected schema files
+      description: >
+        Optional — list the schema files under `schemas/` that would need
+        updating if this proposal were accepted (e.g.
+        `schemas/goals/koth.schema.json`,
+        `schemas/tools/ask-user-question.schema.json`).
+    validations:
+      required: false

@@ -1,0 +1,30 @@
+{
+  "_comment": "Tier 2 — Bash partial metadata example. Git push command from commit skill. No experiment or _compat.",
+  "source": "skill:commit-commands:commit-push-pr",
+  "provenance": {
+    "session_id": "123e4567-e89b-12d3-a456-426614174000",
+    "agent_id": null,
+    "caller_type": "skill",
+    "caller_name": "commit-commands:commit-push-pr",
+    "caller_chain": [],
+    "project_path_hash": "a3f9b2c1",
+    "timestamp_utc": "2026-02-19T15:00:00.000000Z"
+  },
+  "koth": {
+    "oracle_consulted": false,
+    "oracle_recommended_agent": null,
+    "oracle_recommendation_confidence": null,
+    "agents_in_options": null,
+    "koth_domain": "devops",
+    "outcome_signal": "pending",
+    "question_type": null
+  },
+  "decision": {
+    "decision_id": "dec_20260219_150000_004000",
+    "intent_classification": "editing",
+    "entity_id": "a3f9b2c1",
+    "signal_type": "post_decision",
+    "parent_decision_id": null,
+    "decision_domain": "devops"
+  }
+}

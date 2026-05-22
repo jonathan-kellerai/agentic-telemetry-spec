@@ -1,0 +1,12 @@
+# Sensitive-only CODEOWNERS — foundational and governance files require
+# review by the repository owner. Leaf / tool-level artifacts stay open.
+# Last-match-wins: more specific patterns below override less specific ones.
+# No catch-all (*) rule — leaf artifacts are intentionally left open.
+
+/.github/                        @jonathan-kellerai
+/LICENSE                         @jonathan-kellerai
+/NOTICE                          @jonathan-kellerai
+/AGENTS.md                       @jonathan-kellerai
+/CLAUDE.md                       @jonathan-kellerai
+/schemas/base/                   @jonathan-kellerai
+/schemas/goals/                  @jonathan-kellerai

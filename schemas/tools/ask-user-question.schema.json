@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ask-user-question.schema.json",
+  "title": "AskUserQuestion Metadata — Tier 1 (Full)",
+  "description": "Full 5-goal metadata for AskUserQuestion. All four top-level goal keys are expected. When presenting agent selection options, populate koth.agents_in_options to generate KOTH win/loss training signals from the user's choice. The experiment block is omitted for non-experimental calls.",
+  "allOf": [{ "$ref": "../base/base-metadata.schema.json" }],
+  "required": ["source", "provenance", "koth", "decision"],
+  "notes": {
+    "koth.agents_in_options": "Set when options contain agent names. Selected agent = win, others = loss. Primary KOTH training signal (1.5x source weight).",
+    "koth.question_type": "Classify the decision type for KOTH domain routing.",
+    "decision.signal_type": "Typically 'pre_decision' — the question IS the decision point.",
+    "experiment": "Include when this AskUserQuestion call is part of a named A/B experiment (e.g., testing markdown-preview vs text-only option presentation)."
+  },
+  "examples": [
+    {
+      "source": "skill:feature-dev:feature-dev",
+      "provenance": {
+        "session_id": "123e4567-e89b-12d3-a456-426614174000",
+        "agent_id": null,
+        "caller_type": "skill",
+        "caller_name": "feature-dev:feature-dev",
+        "caller_chain": [],
+        "project_path_hash": "a3f9b2c1",
+        "timestamp_utc": "2026-02-19T14:30:22.123456Z"
+      },
+      "koth": {
+        "oracle_consulted": true,
+        "oracle_recommended_agent": "morphllm:code-editor",
+        "oracle_recommendation_confidence": 0.82,
+        "agents_in_options": ["morphllm:code-editor", "general-purpose"],
+        "koth_domain": "editing",
+        "outcome_signal": "pending",
+        "question_type": "tooling"
+      },
+      "decision": {
+        "decision_id": "dec_20260219_143022_123456",
+        "intent_classification": "planning",
+        "entity_id": "a3f9b2c1",
+        "signal_type": "pre_decision",
+        "parent_decision_id": null,
+        "decision_domain": "backend"
+      }
+    }
+  ]
+}

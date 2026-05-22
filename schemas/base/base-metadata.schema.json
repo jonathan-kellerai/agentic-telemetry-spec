@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "base-metadata.schema.json",
+  "title": "DGM Base Metadata",
+  "description": "Extensible base metadata schema inherited by all Claude Code tool schemas. Every tool carries at minimum 'source' and 'provenance'; Tier 1 tools carry all 5 goal fragments.",
+  "type": "object",
+  "properties": {
+    "source": {
+      "type": "string",
+      "description": "Parseable caller identifier: {caller_type}:{caller_name}. caller_type enum: skill | agent | hook | main. Examples: 'skill:feature-dev:feature-dev', 'agent:code-architect', 'hook:UserPromptSubmit', 'main:orchestrator'. Backward-compatible with existing AskUserQuestion source string.",
+      "pattern": "^(skill|agent|hook|main):.+$"
+    },
+    "provenance": {
+      "$ref": "../goals/provenance.schema.json",
+      "description": "Caller identity chain: session → agent → skill/hook. Present on all tiers."
+    },
+    "experiment": {
+      "$ref": "../goals/experiment.schema.json",
+      "description": "A/B test context: template variant and experiment assignment. Present on Tier 1 only."
+    },
+    "koth": {
+      "$ref": "../goals/koth.schema.json",
+      "description": "KOTH/Oracle integration: ELO signals and Oracle recommendation context. Present on Tier 1 and Tier 2."
+    },
+    "decision": {
+      "$ref": "../goals/decision.schema.json",
+      "description": "Decision Logger join key and intent classification. Present on Tier 1 and Tier 2."
+    },
+    "_compat": {
+      "$ref": "../goals/backward-compat.schema.json",
+      "description": "Backward compatibility markers. Present when migrating from legacy metadata shapes."
+    }
+  },
+  "required": ["source", "provenance"],
+  "additionalProperties": false,
+  "examples": [
+    {
+      "source": "skill:feature-dev:feature-dev",
+      "provenance": {
+        "session_id": "123e4567-e89b-12d3-a456-426614174000",
+        "agent_id": null,
+        "caller_type": "skill",
+        "caller_name": "feature-dev:feature-dev",
+        "caller_chain": []
+      }
+    }
+  ]
+}

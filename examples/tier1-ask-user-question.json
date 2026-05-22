@@ -1,0 +1,38 @@
+{
+  "_comment": "Tier 1 — AskUserQuestion full metadata example. Agent-selection question where Oracle was consulted.",
+  "source": "skill:feature-dev:feature-dev",
+  "provenance": {
+    "session_id": "123e4567-e89b-12d3-a456-426614174000",
+    "agent_id": null,
+    "caller_type": "skill",
+    "caller_name": "feature-dev:feature-dev",
+    "caller_chain": [],
+    "project_path_hash": "a3f9b2c1",
+    "timestamp_utc": "2026-02-19T14:30:22.123456Z"
+  },
+  "experiment": {
+    "template_id": "agent-selector-v2",
+    "template_version": "2.0.0",
+    "experiment_id": "exp-oracle-guidance-2026-02",
+    "variant_id": "oracle-guided",
+    "assignment_method": "oracle_guided",
+    "treatment_group": "treatment"
+  },
+  "koth": {
+    "oracle_consulted": true,
+    "oracle_recommended_agent": "morphllm:code-editor",
+    "oracle_recommendation_confidence": 0.82,
+    "agents_in_options": ["morphllm:code-editor", "general-purpose", "code-simplifier"],
+    "koth_domain": "editing",
+    "outcome_signal": "pending",
+    "question_type": "tooling"
+  },
+  "decision": {
+    "decision_id": "dec_20260219_143022_123456",
+    "intent_classification": "planning",
+    "entity_id": "a3f9b2c1",
+    "signal_type": "pre_decision",
+    "parent_decision_id": null,
+    "decision_domain": "backend"
+  }
+}

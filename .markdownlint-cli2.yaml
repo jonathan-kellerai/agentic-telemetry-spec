@@ -1,0 +1,7 @@
+config:
+  default: true
+  MD013: false  # line length — disabled for spec prose
+ignores:
+  - "node_modules/**"
+  - "CHANGELOG.md"
+  - ".claude-tmp/**"

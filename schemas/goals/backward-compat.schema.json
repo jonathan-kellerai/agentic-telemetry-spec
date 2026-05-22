@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "backward-compat.schema.json",
+  "title": "DGM Backward Compatibility Fragment",
+  "description": "Migration provenance and legacy value preservation during schema evolution. Tracks schema version and preserves legacy source strings when migrating from existing metadata shapes.",
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "description": "Semver of the DGM metadata schema version in use (e.g., '1.0.0'). Required when _compat block is present.",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$"
+    },
+    "legacy_source": {
+      "type": ["string", "null"],
+      "description": "Original flat source string value, preserved during migration from existing AskUserQuestion format (e.g., 'remember'). Null if the tool never had a legacy source."
+    },
+    "migrated_from": {
+      "type": ["object", "null"],
+      "description": "Migration provenance tracking the original schema and migration timestamp. Null if this record was never migrated.",
+      "properties": {
+        "tool_name": {
+          "type": "string",
+          "description": "Name of the tool this record was migrated from (e.g., 'AskUserQuestion', 'TaskCreate')."
+        },
+        "old_schema_version": {
+          "type": "string",
+          "description": "Semver of the schema being migrated from (e.g., '0.9.0' for pre-DGM metadata).",
+          "pattern": "^\\d+\\.\\d+\\.\\d+$"
+        },
+        "migration_date": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO 8601 timestamp when the migration occurred."
+        }
+      },
+      "required": ["tool_name", "old_schema_version", "migration_date"],
+      "additionalProperties": false
+    },
+    "is_legacy_compat": {
+      "type": "boolean",
+      "description": "True if this record was produced by a caller that hasn't adopted DGM metadata yet. Allows telemetry to distinguish 'no metadata' (old caller) from 'intentionally minimal' (Tier 3). Default: false."
+    }
+  },
+  "required": ["schema_version"],
+  "additionalProperties": false,
+  "examples": [
+    {
+      "schema_version": "1.0.0",
+      "legacy_source": "remember",
+      "migrated_from": {
+        "tool_name": "AskUserQuestion",
+        "old_schema_version": "0.9.0",
+        "migration_date": "2026-02-19T10:30:00Z"
+      },
+      "is_legacy_compat": false
+    },
+    {
+      "schema_version": "1.0.0",
+      "legacy_source": null,
+      "migrated_from": null,
+      "is_legacy_compat": false
+    }
+  ]
+}

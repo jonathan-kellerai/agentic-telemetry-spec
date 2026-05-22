@@ -1,0 +1,13 @@
+# Lefthook git hooks for dgm-telemetry.
+# Install locally with: lefthook install
+#
+# Pre-commit runs the lightweight artifact + sanitization gates. The full
+# `ajv compile` / `ajv validate` suite and commitlint run in CI.
+pre-commit:
+  parallel: true
+  commands:
+    json-wellformed:
+      glob: "*.json"
+      run: for f in {staged_files}; do jq empty "$f" || exit 1; done
+    sanitization:
+      run: bash scripts/check-sanitization.sh

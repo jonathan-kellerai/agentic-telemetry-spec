@@ -1,0 +1,9 @@
+{
+  "_comment": "Tier 3 — Read minimal metadata example. High-frequency tool: only source + 3 required provenance fields. No koth, decision, experiment, or _compat.",
+  "source": "agent:code-explorer",
+  "provenance": {
+    "session_id": "123e4567-e89b-12d3-a456-426614174000",
+    "caller_type": "agent",
+    "caller_name": "code-explorer"
+  }
+}

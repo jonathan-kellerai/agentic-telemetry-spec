@@ -1,0 +1,17 @@
+cff-version: "1.2.0"
+message: "If you use this software, please cite it as below."
+type: software
+title: "dgm-telemetry"
+authors:
+  - family-names: "Bowe"
+    given-names: "Jonathan A."
+version: "0.1.0"
+date-released: "2026-05-21"
+license: "Apache-2.0"
+repository-code: "https://github.com/jonathan-kellerai/dgm-telemetry"
+keywords:
+  - json-schema
+  - telemetry
+  - claude-code
+  - decision-audit
+  - provenance

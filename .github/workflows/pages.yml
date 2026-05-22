@@ -1,0 +1,50 @@
+name: Deploy docs to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Only one Pages deploy may run at a time; do not cancel in-progress deploys.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  build:
+    name: Build Pages artifact
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4  # pin to SHA before release
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5  # pin to SHA before release
+
+      # Publishes the docs/ directory.
+      # Whitepaper markdown (whitepaper-dgm-telemetry.md) must be present in
+      # docs/ before this job can serve it — move it from .claude-tmp/ after
+      # passing the §15 IP-leak audit (OSS-PUBLICATION-STANDARD.md §14).
+      - name: Upload docs artifact
+        uses: actions/upload-pages-artifact@v3  # pin to SHA before release
+        with:
+          path: docs
+
+  deploy:
+    name: Deploy to GitHub Pages
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4  # pin to SHA before release

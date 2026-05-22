@@ -1,0 +1,45 @@
+name: Schema defect
+description: A schema is wrong, incomplete, or contradicts the documentation or worked examples.
+title: "[bug] "
+labels: ["bug", "schema"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this for a concrete defect in a file under `schemas/` or a
+        contradiction between a schema and the companion docs (`docs/`),
+        worked examples (`examples/`), or the README.
+        For an ambiguity rather than an outright error, use the
+        schema-clarification template instead.
+
+  - type: textarea
+    id: location
+    attributes:
+      label: Where is the defect?
+      description: >
+        File path and field/section — e.g.
+        `schemas/goals/koth.schema.json` → `properties.outcome_signal.enum`,
+        or `schemas/base/base-metadata.schema.json` §required.
+      placeholder: "file: schemas/goals/koth.schema.json, field: properties.outcome_signal"
+    validations:
+      required: true
+
+  - type: textarea
+    id: defect
+    attributes:
+      label: What is wrong?
+      description: >
+        Quote the offending field value or constraint and explain the defect.
+        Cite the schema file and line where possible (`file:line` format).
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: What should it say / do instead?
+      description: >
+        Optional — a proposed correction or the correct schema behaviour.
+        If you have a patch, paste it here.
+    validations:
+      required: false

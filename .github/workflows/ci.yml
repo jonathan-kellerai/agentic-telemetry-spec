@@ -1,0 +1,128 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# Cancel superseded runs on the same PR branch to save minutes.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # Primary artifact validation: ajv compile every schema + ajv validate
+  # every example against its relevant schema.
+  # (artifact_type = json-schema; primary_validator = ajv)
+  # ---------------------------------------------------------------------------
+  ajv-validate:
+    name: AJV schema compile + example validation
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4  # pin to SHA before release
+
+      - name: Compile all schemas (ajv compile)
+        # ajv-cli is invoked via npx; no package.json required in the repo.
+        # Exits non-zero if any schema fails to compile against draft 2020-12.
+        run: |
+          status=0
+          while IFS= read -r schema; do
+            echo "Compiling: $schema"
+            if ! npx --yes ajv-cli compile -s "$schema"; then
+              echo "::error file=$schema::ajv compile failed"
+              status=1
+            fi
+          done < <(git ls-files 'schemas/**/*.schema.json')
+          exit $status
+
+      - name: Validate worked examples (ajv validate)
+        # Each example is validated against the schema whose base name matches
+        # the pattern embedded in the example filename, falling back to the
+        # base-metadata schema if no per-tool schema is found.
+        # Mapping: tier1-* → base, tier2-* → base, tier3-* → base
+        # (consumers may tighten this mapping as per-tool schemas mature).
+        run: |
+          status=0
+          base="schemas/base/base-metadata.schema.json"
+          while IFS= read -r example; do
+            echo "Validating: $example"
+            if ! npx --yes ajv-cli validate -s "$base" -d "$example"; then
+              echo "::error file=$example::ajv validate failed"
+              status=1
+            fi
+          done < <(git ls-files 'examples/*.json')
+          exit $status
+
+  # ---------------------------------------------------------------------------
+  # JSON well-formedness: every *.json file must parse cleanly with jq.
+  # ---------------------------------------------------------------------------
+  json-wellformed:
+    name: JSON well-formedness
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4  # pin to SHA before release
+
+      - name: Validate all JSON files
+        run: |
+          status=0
+          while IFS= read -r f; do
+            if ! jq empty "$f" >/dev/null 2>&1; then
+              echo "::error file=$f::invalid JSON"
+              status=1
+            fi
+          done < <(git ls-files '*.json')
+          exit $status
+
+  # ---------------------------------------------------------------------------
+  # Markdown lint
+  # Config: .markdownlint-cli2.yaml at repo root (MD013 disabled for wide
+  # tables and frozen docs — see OSS-PUBLICATION-STANDARD.md §2).
+  # ---------------------------------------------------------------------------
+  markdown-lint:
+    name: Markdown lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4  # pin to SHA before release
+
+      - name: markdownlint-cli2
+        run: npx --yes markdownlint-cli2 "**/*.md" "#node_modules"
+
+  # ---------------------------------------------------------------------------
+  # Sanitization regression gate
+  # Fails the build on any match against the base64-encoded internal-term
+  # denylist. See OSS-PUBLICATION-STANDARD.md §3.
+  # ---------------------------------------------------------------------------
+  sanitization:
+    name: Sanitization gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4  # pin to SHA before release
+
+      - name: Run sanitization check
+        run: bash scripts/check-sanitization.sh
+
+  # ---------------------------------------------------------------------------
+  # Conformance: call the reusable kellerai-oss-template conformance workflow.
+  # artifact_type = json-schema — matches the conformance policy data.json.
+  # NOTE: kellerai-oss-template must be public before this job can run.
+  # Replace <PENDING-SHA> with the verified commit SHA of the template repo
+  # at release time (see OSS-PUBLICATION-STANDARD.md §2).
+  # ---------------------------------------------------------------------------
+  conformance:
+    name: Conformance (kellerai OSS standard)
+    needs: [ajv-validate, json-wellformed]
+    uses: jonathan-kellerai/kellerai-oss-template/.github/workflows/conformance.yml@<PENDING-SHA>
+    with:
+      artifact_type: json-schema

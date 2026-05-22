@@ -1,0 +1,9 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "task-list.schema.json",
+  "title": "TaskList Metadata — Tier 3 (Minimal)",
+  "description": "Minimal metadata for the TaskList tool (read-only task enumeration). Only source and provenance are carried.",
+  "allOf": [{ "$ref": "../base/base-metadata.schema.json" }],
+  "required": ["source", "provenance"],
+  "notes": { "koth": "NOT applicable.", "decision": "NOT applicable." }
+}

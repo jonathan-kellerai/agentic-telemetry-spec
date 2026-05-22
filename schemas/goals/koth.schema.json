@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "koth.schema.json",
+  "title": "KOTH/Oracle Integration",
+  "description": "Connects tool outcomes to ELO ratings and Thompson Sampling for agent performance tracking. Links Oracle recommendations to actual selections and feeds win/loss signals back to the KOTH rating engine.",
+  "type": "object",
+  "properties": {
+    "oracle_consulted": {
+      "type": "boolean",
+      "description": "Was Oracle queried before this tool call? Required when koth block is present. When true, oracle_recommended_agent and oracle_recommendation_confidence must be populated."
+    },
+    "oracle_recommended_agent": {
+      "type": ["string", "null"],
+      "description": "Oracle's top recommendation at call time via Thompson Sampling. Null if oracle not consulted. Format: agent type string (e.g., 'morphllm:code-editor', 'general-purpose', 'code-architect')."
+    },
+    "oracle_recommendation_confidence": {
+      "type": ["number", "null"],
+      "description": "Oracle's confidence score [0.0, 1.0] based on Beta distribution sampling. Null if oracle not consulted. Higher values indicate stronger historical performance and larger sample size.",
+      "minimum": 0.0,
+      "maximum": 1.0
+    },
+    "agents_in_options": {
+      "type": ["array", "null"],
+      "items": {
+        "type": "string"
+      },
+      "description": "For AskUserQuestion agent-selection questions only: agent names appearing as selectable options. The selected agent gets a 'win' signal, unselected agents get 'loss' signals. Null for non-agent-selection tools. This field is the primary training data source for KOTH ELO updates (source_weights.ab_testing = 1.5x)."
+    },
+    "koth_domain": {
+      "type": ["string", "null"],
+      "enum": ["architecture", "planning", "editing", "review", "tooling", "data", "security", "cross_cutting", null],
+      "description": "Optional subcategory routing for domain-specific ELO ratings. Maps to KOTH initial-seeding.yaml domain structure. When null, uses global rating pool."
+    },
+    "outcome_signal": {
+      "type": ["string", "null"],
+      "enum": ["win", "loss", "draw", "pending", null],
+      "description": "Set post-response by telemetry hook (<your-telemetry-ingestor> PostToolUse). Null at call time, populated after tool execution completes. 'pending' indicates deferred outcome (e.g., awaiting UAEF eval). This drives ELO rating updates via <your-elo-engine>."
+    },
+    "question_type": {
+      "type": ["string", "null"],
+      "enum": ["architecture", "approval", "feature_selection", "binary_choice", "priority", "config", "workflow", "tooling", "naming", null],
+      "description": "For AskUserQuestion only: primary type of decision being asked. Used for intent classification and KOTH domain routing. Null for non-interactive tools."
+    }
+  },
+  "required": ["oracle_consulted"],
+  "additionalProperties": false,
+  "examples": [
+    {
+      "oracle_consulted": true,
+      "oracle_recommended_agent": "morphllm:code-editor",
+      "oracle_recommendation_confidence": 0.82,
+      "agents_in_options": ["morphllm:code-editor", "general-purpose"],
+      "koth_domain": "editing",
+      "outcome_signal": "win",
+      "question_type": "tooling"
+    },
+    {
+      "oracle_consulted": false,
+      "oracle_recommended_agent": null,
+      "oracle_recommendation_confidence": null,
+      "agents_in_options": null,
+      "koth_domain": null,
+      "outcome_signal": "pending",
+      "question_type": null
+    }
+  ]
+}

@@ -1,0 +1,39 @@
+name: Schema clarification
+description: A schema element is ambiguous, under-specified, or admits more than one reading.
+title: "[clarification] "
+labels: ["clarification", "schema"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this when a field definition, constraint, or design decision in
+        `schemas/` is not wrong, but is unclear or leaves a detail unstated.
+        For an outright error, use the schema-bug template instead.
+
+  - type: textarea
+    id: element
+    attributes:
+      label: Which element is ambiguous?
+      description: >
+        Schema file, field name, and line reference where possible.
+      placeholder: "schemas/goals/backward-compat.schema.json — is the _compat.source field required when no legacy source string exists, or only when one does?"
+    validations:
+      required: true
+
+  - type: textarea
+    id: ambiguity
+    attributes:
+      label: What is unclear?
+      description: Describe the competing readings, or the detail that is missing.
+    validations:
+      required: true
+
+  - type: textarea
+    id: impact
+    attributes:
+      label: Why does it matter?
+      description: >
+        Optional — what integration step, tool-schema authoring decision, or
+        consumer implementation this ambiguity blocks.
+    validations:
+      required: false

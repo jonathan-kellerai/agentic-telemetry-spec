@@ -1,0 +1,13 @@
+dgm-telemetry
+
+Copyright 2025 Jonathan A. Bowe
+
+This project contains a JSON Schema specification for decision-audit telemetry
+on Claude Code primitives (tool calls, agent sessions, A/B experiments, KoTH
+oracle comparisons, decision logging, and backward-compatibility tracking).
+
+The schemas were derived from internal KellerAI design work and sanitized for
+public release on 2026-05-20.
+
+All modifications and contributions are made available under the Apache License,
+Version 2.0. See LICENSE for the complete license text.

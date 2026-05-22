@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "enter-plan-mode.schema.json",
+  "title": "EnterPlanMode Metadata — Tier 2 (Partial)",
+  "description": "Partial metadata for the EnterPlanMode tool. Signals the start of a planning phase. decision.signal_type='pre_decision' — the plan mode entry IS the transition into a decision context. koth domain is typically 'planning'.",
+  "allOf": [{ "$ref": "../base/base-metadata.schema.json" }],
+  "required": ["source", "provenance"],
+  "notes": {
+    "decision.signal_type": "'pre_decision' — entering plan mode precedes the actual decision (ExitPlanMode).",
+    "koth.koth_domain": "Always 'planning' for EnterPlanMode.",
+    "koth.outcome_signal": "Set on ExitPlanMode (the paired tool), not here. Set to 'pending' at EnterPlanMode time."
+  }
+}

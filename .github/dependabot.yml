@@ -1,0 +1,16 @@
+version: 2
+
+# GitHub Actions ecosystem only — this repo has no runtime language dependencies.
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    # Group all Actions updates into a single PR to reduce noise.
+    groups:
+      github-actions:
+        patterns:
+          - "*"
+    commit-message:
+      prefix: chore
+    open-pull-requests-limit: 5

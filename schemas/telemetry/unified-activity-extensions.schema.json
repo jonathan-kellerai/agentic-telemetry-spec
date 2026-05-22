@@ -1,0 +1,149 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "unified-activity-extensions.schema.json",
+  "title": "DGM Unified Activity Extensions",
+  "description": "New fields to add to existing unified-activity.jsonl records. All DGM fields are nested under the top-level 'dgm' key to avoid collision with existing fields (session_id, tool_name, ts, agent_id, etc.). Additive-only: no existing unified-activity fields are removed or renamed.",
+  "type": "object",
+  "properties": {
+    "dgm": {
+      "type": "object",
+      "description": "DGM telemetry metadata block. Populated by <your-telemetry-ingestor> _dgm_fields() function from the tool call's metadata parameter.",
+      "properties": {
+        "source": {
+          "type": "string",
+          "description": "Parsed from metadata.source. Format: {caller_type}:{caller_name}.",
+          "pattern": "^(skill|agent|hook|main):.+$"
+        },
+        "provenance": {
+          "$ref": "../goals/provenance.schema.json",
+          "description": "Caller identity extracted from metadata.provenance."
+        },
+        "experiment": {
+          "oneOf": [
+            { "$ref": "../goals/experiment.schema.json" },
+            { "type": "null" }
+          ],
+          "description": "A/B test context. Null if metadata.experiment was absent."
+        },
+        "koth": {
+          "oneOf": [
+            { "$ref": "../goals/koth.schema.json" },
+            { "type": "null" }
+          ],
+          "description": "KOTH/Oracle context. Null if metadata.koth was absent (Tier 3 tools)."
+        },
+        "decision": {
+          "oneOf": [
+            { "$ref": "../goals/decision.schema.json" },
+            { "type": "null" }
+          ],
+          "description": "Decision Logger join key. Null if metadata.decision was absent."
+        },
+        "_compat": {
+          "oneOf": [
+            { "$ref": "../goals/backward-compat.schema.json" },
+            { "type": "null" }
+          ],
+          "description": "Migration provenance. Null for new callers. Non-null for callers migrating from legacy metadata."
+        },
+        "tier": {
+          "type": "integer",
+          "enum": [1, 2, 3],
+          "description": "Computed by <your-telemetry-ingestor> based on which goal blocks are present. 1=full, 2=partial, 3=minimal."
+        },
+        "has_legacy_compat": {
+          "type": "boolean",
+          "description": "True if _compat.is_legacy_compat=true or if the metadata was produced by a pre-DGM caller. Enables telemetry filtering to distinguish adoption progress."
+        }
+      },
+      "required": ["source", "provenance", "tier"],
+      "additionalProperties": false
+    }
+  },
+  "notes": {
+    "existing_fields_preserved": "All existing unified-activity.schema.json fields (session_id, tool_name, ts, agent_id, tool_input, tool_result, etc.) remain unchanged.",
+    "extraction_hook": "<your-telemetry-ingestor> PostToolUse: call _dgm_fields(tool_metadata) → populate record['dgm'].",
+    "task_create_update_special": "For TaskCreate/TaskUpdate, DGM metadata is at tool_input.metadata._dgm (not tool_input.metadata directly). <your-telemetry-ingestor> must check both locations.",
+    "outcome_signal_update": "koth.outcome_signal starts as 'pending' at PreToolUse and is updated to 'win'/'loss'/'draw' at PostToolUse based on tool result.",
+    "schema_version": "1.0.0"
+  },
+  "examples": [
+    {
+      "dgm": {
+        "source": "skill:feature-dev:feature-dev",
+        "provenance": {
+          "session_id": "123e4567-e89b-12d3-a456-426614174000",
+          "agent_id": null,
+          "caller_type": "skill",
+          "caller_name": "feature-dev:feature-dev",
+          "caller_chain": [],
+          "project_path_hash": "a3f9b2c1",
+          "timestamp_utc": "2026-02-19T14:30:22.123456Z"
+        },
+        "experiment": null,
+        "koth": {
+          "oracle_consulted": true,
+          "oracle_recommended_agent": "morphllm:code-editor",
+          "oracle_recommendation_confidence": 0.82,
+          "agents_in_options": ["morphllm:code-editor", "general-purpose"],
+          "koth_domain": "editing",
+          "outcome_signal": "win",
+          "question_type": "tooling"
+        },
+        "decision": {
+          "decision_id": "dec_20260219_143022_123456",
+          "intent_classification": "planning",
+          "entity_id": "a3f9b2c1",
+          "signal_type": "pre_decision",
+          "parent_decision_id": null,
+          "decision_domain": "backend"
+        },
+        "_compat": null,
+        "tier": 1,
+        "has_legacy_compat": false
+      }
+    },
+    {
+      "dgm": {
+        "source": "skill:commit-commands:commit",
+        "provenance": {
+          "session_id": "123e4567-e89b-12d3-a456-426614174000",
+          "agent_id": null,
+          "caller_type": "skill",
+          "caller_name": "commit-commands:commit",
+          "caller_chain": []
+        },
+        "experiment": null,
+        "koth": {
+          "oracle_consulted": false,
+          "oracle_recommended_agent": null,
+          "oracle_recommendation_confidence": null,
+          "agents_in_options": null,
+          "koth_domain": "devops",
+          "outcome_signal": "win",
+          "question_type": null
+        },
+        "decision": null,
+        "_compat": null,
+        "tier": 2,
+        "has_legacy_compat": false
+      }
+    },
+    {
+      "dgm": {
+        "source": "agent:code-explorer",
+        "provenance": {
+          "session_id": "123e4567-e89b-12d3-a456-426614174000",
+          "caller_type": "agent",
+          "caller_name": "code-explorer"
+        },
+        "experiment": null,
+        "koth": null,
+        "decision": null,
+        "_compat": null,
+        "tier": 3,
+        "has_legacy_compat": false
+      }
+    }
+  ]
+}
