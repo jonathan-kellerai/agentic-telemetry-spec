@@ -1,10 +1,10 @@
-# dgm-telemetry: A Composable JSON Schema Suite for Agentic AI Telemetry
+# agentic-telemetry-spec: A Composable JSON Schema Suite for Agentic AI Telemetry
 
-**Standardized provenance, A/B experimentation, performance attribution, decision joins, and backward-compatible adoption for multi-agent systems**
+## Standardized provenance, A/B experimentation, performance attribution, decision joins, and backward-compatible adoption for multi-agent systems
 
 ---
 
-- **Project:** dgm-telemetry contributors
+- **Project:** agentic-telemetry-spec contributors
 - **Date:** 2026-05-20
 - **License:** Apache-2.0
 - **Classification:** Technical White Paper
@@ -15,7 +15,7 @@
 
 Agentic AI systems built on Claude Code and similar primitives lack a shared telemetry vocabulary. In the unmodified baseline, only three of eighteen Claude Code tools carry any structured metadata, and the field present on the most consequential of them — `AskUserQuestion` — is a single opaque `source` string. The remaining tools emit no caller identity, no decision-context join keys, and no agent-attribution signals. As a result, downstream telemetry consumers cannot reproduce a session, attribute an outcome to the agent that produced it, or run controlled experiments across prompt or tool variants.
 
-This paper presents `dgm-telemetry`, an Apache-2.0 JSON Schema suite that defines a unified metadata envelope for every Claude Code primitive. The schema is decomposed into five orthogonal *design goals* — provenance, A/B experimentation, KoTH/Oracle performance attribution, decision-logger joins, and backward compatibility — composed through JSON Schema `$ref` into twenty-four per-tool schemas. A three-tier instrumentation model assigns proportionally more metadata to consequential tools (`AskUserQuestion`, `Task`, `Skill`) while keeping read-heavy primitives (`Read`, `Glob`, `Grep`) cheap. A separate `unified-activity-extensions` schema describes the additive, non-breaking shape exported to JSONL telemetry streams.
+This paper presents `agentic-telemetry-spec`, an Apache-2.0 JSON Schema suite that defines a unified metadata envelope for every Claude Code primitive. The schema is decomposed into five orthogonal *design goals* — provenance, A/B experimentation, KoTH/Oracle performance attribution, decision-logger joins, and backward compatibility — composed through JSON Schema `$ref` into twenty-four per-tool schemas. A three-tier instrumentation model assigns proportionally more metadata to consequential tools (`AskUserQuestion`, `Task`, `Skill`) while keeping read-heavy primitives (`Read`, `Glob`, `Grep`) cheap. A separate `unified-activity-extensions` schema describes the additive, non-breaking shape exported to JSONL telemetry streams.
 
 The contribution is twofold. First, the schemas establish a vendor-neutral, validator-checkable contract for agentic telemetry that any ingestion pipeline can adopt. Second, the KoTH/Oracle fragment encodes agent performance — ELO ratings, Thompson Sampling Beta parameters, and domain-routed win/loss signals — as a first-class telemetry concern rather than an opaque downstream computation. The suite ships with worked examples for each tier and with explicit integration points for ingestion, decision storage, ELO scoring, and A/B runners.
 
@@ -27,7 +27,7 @@ This work makes the following distinct contributions:
 - **A proportional three-tier instrumentation model** that aligns metadata cost with tool consequence, so high-frequency reads stay cheap while high-stakes decisions carry full context.
 - **A telemetry-native encoding of agent performance** through the KoTH/Oracle fragment, which exposes ELO ratings, Beta-distributed Thompson Sampling parameters, and outcome signals directly on the tool-call record.
 - **A bidirectional decision-join key** linking individual tool calls to `DecisionContext` records, enabling reconstruction of decision lifecycles (pre-decision, post-decision, outcome) from JSONL telemetry.
-- **An additive backward-compatibility design** that preserves the legacy `AskUserQuestion` `source` string, isolates DGM metadata behind a single `_compat` block, and reserves the `metadata._dgm` namespace for tools whose `metadata` field is user-controlled.
+- **An additive backward-compatibility design** that preserves the legacy `AskUserQuestion` `source` string, isolates ATS metadata behind a single `_compat` block, and reserves the `metadata._dgm` namespace for tools whose `metadata` field is user-controlled.
 - **Worked Tier 1, Tier 2, and Tier 3 examples** alongside a unified-activity extension schema that documents how metadata is reshaped into the persisted telemetry record.
 
 ---
@@ -38,16 +38,16 @@ Production agentic systems make hundreds of tool calls per session: file reads, 
 
 This deficit blocks four practical capabilities that are routinely expected of mature observability stacks. First, **provenance** — tracing a tool call back through the chain of subagents, skills, and hooks that produced it — is impossible without a caller identity on every record. Second, **A/B experimentation** across prompt templates, option orderings, or selection strategies requires that each call carry an experiment and variant identifier. Third, **agent performance attribution** — the ability to update a per-agent rating based on whether its actions led to a positive outcome — requires both a stable agent identifier and a win/loss signal on the call record. Fourth, **decision reconstruction** — answering "what tool calls informed this decision, and what tool calls executed it?" — requires a bidirectional join between the tool stream and a decision log.
 
-`dgm-telemetry` addresses these four capabilities, plus a fifth — **backward compatibility** — through a single composable metadata schema. The schema is defined formally in JSON Schema draft 2020-12 (`schemas/base/base-metadata.schema.json` line 2) and partitioned into five orthogonal design-goal fragments, each owning exactly one top-level key in the metadata envelope (`docs/design-goals.md` lines 170-180). The remainder of this paper proceeds as follows. Section 2 describes the repository architecture. Section 3 enumerates the five design goals and their schema fragments. Section 4 motivates the tier system. Section 5 dives into the KoTH/Oracle fragment as the novel algorithmic contribution. Section 6 covers backward compatibility. Section 7 presents concrete use cases. Section 8 is an integration guide. Section 9 surveys related work. Section 10 discusses ecosystem impact, and Section 11 concludes.
+`agentic-telemetry-spec` addresses these four capabilities, plus a fifth — **backward compatibility** — through a single composable metadata schema. The schema is defined formally in JSON Schema draft 2020-12 (`schemas/base/base-metadata.schema.json` line 2) and partitioned into five orthogonal design-goal fragments, each owning exactly one top-level key in the metadata envelope (`docs/design-goals.md` lines 170-180). The remainder of this paper proceeds as follows. Section 2 describes the repository architecture. Section 3 enumerates the five design goals and their schema fragments. Section 4 motivates the tier system. Section 5 dives into the KoTH/Oracle fragment as the novel algorithmic contribution. Section 6 covers backward compatibility. Section 7 presents concrete use cases. Section 8 is an integration guide. Section 9 surveys related work. Section 10 discusses ecosystem impact, and Section 11 concludes.
 
 ---
 
 ## 2. Architecture
 
-The `dgm-telemetry` repository is organized around three primary directories — `schemas/`, `docs/`, and `examples/` — plus top-level governance files. The complete on-disk layout is shown below.
+The `agentic-telemetry-spec` repository is organized around three primary directories — `schemas/`, `docs/`, and `examples/` — plus top-level governance files. The complete on-disk layout is shown below.
 
 ```text
-dgm-telemetry/
+agentic-telemetry-spec/
 ├── schemas/
 │   ├── base/
 │   │   └── base-metadata.schema.json          # composable root
@@ -104,7 +104,7 @@ dgm-telemetry/
 └── NOTICE
 ```
 
-The architecture follows a three-layer composition pattern. At the root, `schemas/base/base-metadata.schema.json` declares the metadata envelope with two required keys (`source`, `provenance`) and four optional keys (`experiment`, `koth`, `decision`, `_compat`), each defined by `$ref` to a goal fragment (`base-metadata.schema.json` lines 7-33). The middle layer, `schemas/goals/`, contains the five fragments. The leaf layer, `schemas/tools/`, contains twenty-four tool-specific schemas that consume the base schema and constrain which goal fragments are required for that tool. A separate `schemas/telemetry/unified-activity-extensions.schema.json` describes the shape of the persisted JSONL record — namely, that all DGM fields are nested under a single `dgm` top-level key with a computed `tier` integer (`unified-activity-extensions.schema.json` lines 7-62).
+The architecture follows a three-layer composition pattern. At the root, `schemas/base/base-metadata.schema.json` declares the metadata envelope with two required keys (`source`, `provenance`) and four optional keys (`experiment`, `koth`, `decision`, `_compat`), each defined by `$ref` to a goal fragment (`base-metadata.schema.json` lines 7-33). The middle layer, `schemas/goals/`, contains the five fragments. The leaf layer, `schemas/tools/`, contains twenty-four tool-specific schemas that consume the base schema and constrain which goal fragments are required for that tool. A separate `schemas/telemetry/unified-activity-extensions.schema.json` describes the shape of the persisted JSONL record — namely, that all ATS fields are nested under a single `dgm` top-level key with a computed `tier` integer (`unified-activity-extensions.schema.json` lines 7-62).
 
 The end-to-end data flow is straightforward:
 
@@ -150,15 +150,15 @@ The `signal_type` enables a useful temporal reading of a decision: pre-decision 
 
 ### 3.5 Goal 5 — Backward Compatibility (`_compat`)
 
-The `_compat` fragment captures migration provenance. It carries a required `schema_version` (semver-constrained, `schemas/goals/backward-compat.schema.json` line 12), an optional `legacy_source` that preserves the original `AskUserQuestion` source string (such as the value `"remember"`, `schemas/goals/backward-compat.schema.json` line 14), a `migrated_from` object recording the source tool name, old schema version, and migration timestamp, and an `is_legacy_compat` boolean that flags records produced by callers that have not yet adopted DGM metadata. Section 6 develops the compatibility design in detail.
+The `_compat` fragment captures migration provenance. It carries a required `schema_version` (semver-constrained, `schemas/goals/backward-compat.schema.json` line 12), an optional `legacy_source` that preserves the original `AskUserQuestion` source string (such as the value `"remember"`, `schemas/goals/backward-compat.schema.json` line 14), a `migrated_from` object recording the source tool name, old schema version, and migration timestamp, and an `is_legacy_compat` boolean that flags records produced by callers that have not yet adopted ATS metadata. Section 6 develops the compatibility design in detail.
 
 ---
 
 ## 4. The Tier System
 
-The tier system is the proportional-instrumentation principle of `dgm-telemetry`. Not every tool warrants the same metadata footprint. A `Read` call is fired thousands of times in a session; attaching an A/B experiment block to each would inflate telemetry volume without adding signal. An `AskUserQuestion` call, by contrast, is a rare and consequential event: it represents a routed decision, often an agent-selection vote, and its outcome must be attributable.
+The tier system is the proportional-instrumentation principle of `agentic-telemetry-spec`. Not every tool warrants the same metadata footprint. A `Read` call is fired thousands of times in a session; attaching an A/B experiment block to each would inflate telemetry volume without adding signal. An `AskUserQuestion` call, by contrast, is a rare and consequential event: it represents a routed decision, often an agent-selection vote, and its outcome must be attributable.
 
-`dgm-telemetry` therefore defines three tiers (`README.md` lines 38-44):
+`agentic-telemetry-spec` therefore defines three tiers (`README.md` lines 38-44):
 
 - **Tier 1 — Full metadata.** All five goal fragments apply. Three tools qualify: `AskUserQuestion`, `Task`, and `Skill`. These represent significant decisions with measurable outcomes — a user vote, a sub-agent spawn, or a named-skill invocation.
 - **Tier 2 — Partial metadata.** Provenance is required; KoTH and Decision are optional; Experiment and `_compat` do not apply. Six tools qualify: `Bash`, `Write`, `Edit`, `SendMessage`, `EnterPlanMode`, and `ExitPlanMode`. These execute consequential actions but are not themselves selection events.
@@ -172,7 +172,7 @@ A tier is not declared in the metadata; it is *computed* by the ingestor based o
 
 ## 5. KoTH Oracle: Agent Performance as a First-Class Telemetry Concern
 
-The KoTH/Oracle fragment is the novel algorithmic contribution of `dgm-telemetry`. Most telemetry schemas treat agent performance as a downstream computation: log actions, compute scores later. `dgm-telemetry` inverts that by placing the inputs and outputs of the rating computation directly on the tool-call record.
+The KoTH/Oracle fragment is the novel algorithmic contribution of `agentic-telemetry-spec`. Most telemetry schemas treat agent performance as a downstream computation: log actions, compute scores later. `agentic-telemetry-spec` inverts that by placing the inputs and outputs of the rating computation directly on the tool-call record.
 
 ### 5.1 ELO Ratings
 
@@ -180,11 +180,11 @@ Each agent carries a per-domain ELO rating. The companion database schema starts
 
 $$R_a' = R_a + K \cdot (S_a - E_a), \quad E_a = \frac{1}{1 + 10^{(R_b - R_a)/400}}$$
 
-where $R_a, R_b$ are the agents' pre-match ratings, $S_a \in \{1, 0.5, 0\}$ encodes the match result, $E_a$ is the expected score, and $K$ is the update step. In `dgm-telemetry`, an `AskUserQuestion` with `agents_in_options = [a, b, c]` and a user selection of $a$ produces one win for $a$ and one loss each for $b$ and $c$ — the question itself is the "match." The `outcome_signal` field on the KoTH fragment carries the result; the `agents_in_options` field carries the participants.
+where $R_a, R_b$ are the agents' pre-match ratings, $S_a \in \{1, 0.5, 0\}$ encodes the match result, $E_a$ is the expected score, and $K$ is the update step. In `agentic-telemetry-spec`, an `AskUserQuestion` with `agents_in_options = [a, b, c]` and a user selection of $a$ produces one win for $a$ and one loss each for $b$ and $c$ — the question itself is the "match." The `outcome_signal` field on the KoTH fragment carries the result; the `agents_in_options` field carries the participants.
 
 ### 5.2 Thompson Sampling with Beta Distributions
 
-Beyond ELO, `dgm-telemetry` exposes Thompson Sampling state. Each agent (optionally per domain) carries Beta-distribution shape parameters $\alpha$ and $\beta$, initialized to $1$ (`SCHEMA_DATABASE.md` lines 181-184). After $w$ wins and $\ell$ losses, the posterior is:
+Beyond ELO, `agentic-telemetry-spec` exposes Thompson Sampling state. Each agent (optionally per domain) carries Beta-distribution shape parameters $\alpha$ and $\beta$, initialized to $1$ (`SCHEMA_DATABASE.md` lines 181-184). After $w$ wins and $\ell$ losses, the posterior is:
 
 $$\theta_i \sim \text{Beta}(\alpha_i + w_i, \beta_i + \ell_i)$$
 
@@ -196,7 +196,7 @@ For agent selection, the Oracle draws one sample $\hat{\theta}_i$ per candidate 
 
 ### 5.3 Domain-Specific ELO Routing
 
-`dgm-telemetry` partitions ratings by domain. The KoTH fragment carries a `koth_domain` constrained to `architecture | planning | editing | review | tooling | data | security | cross_cutting | null` (`schemas/goals/koth.schema.json` line 31). An agent excellent at editing may be mediocre at architecture; routing outcomes to per-domain Beta posteriors prevents averaging across these regimes. A `null` value falls through to the global rating pool.
+`agentic-telemetry-spec` partitions ratings by domain. The KoTH fragment carries a `koth_domain` constrained to `architecture | planning | editing | review | tooling | data | security | cross_cutting | null` (`schemas/goals/koth.schema.json` line 31). An agent excellent at editing may be mediocre at architecture; routing outcomes to per-domain Beta posteriors prevents averaging across these regimes. A `null` value falls through to the global rating pool.
 
 ### 5.4 The Oracle as Recommendation Interface
 
@@ -207,7 +207,7 @@ The Oracle is the read interface to the agent-rating state. When invoked, it sam
 The `outcome_signal` field is the write interface. At `PreToolUse`, the ingestor sets it to `pending`. At `PostToolUse`, the ingestor updates it to `win`, `loss`, or `draw` based on the tool result (`schemas/telemetry/unified-activity-extensions.schema.json` line 67). This update is what drives the ELO and Beta posterior updates. The full lifecycle of a single `AskUserQuestion` agent-selection call is therefore:
 
 1. Oracle samples Beta posteriors, returns recommendation.
-2. `dgm-telemetry` envelope is constructed with `oracle_consulted=true`, `oracle_recommended_agent`, `oracle_recommendation_confidence`, `agents_in_options`, and `outcome_signal=pending`.
+2. `agentic-telemetry-spec` envelope is constructed with `oracle_consulted=true`, `oracle_recommended_agent`, `oracle_recommendation_confidence`, `agents_in_options`, and `outcome_signal=pending`.
 3. User selects an agent.
 4. `PostToolUse` updates `outcome_signal` to `win` for the selected agent (and `loss` records are derivable for the others from `agents_in_options`).
 5. ELO and Beta posteriors update accordingly.
@@ -218,13 +218,13 @@ This loop is closed entirely within the schema-defined fields. No out-of-band si
 
 ## 6. Backward Compatibility as a Schema Concern
 
-Backward compatibility in `dgm-telemetry` is not an implementation detail; it is its own design goal, with its own schema fragment, its own top-level key, and its own semver-gated migration provenance.
+Backward compatibility in `agentic-telemetry-spec` is not an implementation detail; it is its own design goal, with its own schema fragment, its own top-level key, and its own semver-gated migration provenance.
 
-The pre-DGM baseline has three quirks the schema must accommodate. First, `AskUserQuestion` already carries a flat `source: string` field. Existing callers emit values like `"remember"`. Second, `TaskCreate` and `TaskUpdate` already have a `metadata` field, but it is user-data: arbitrary content owned by the calling code. Third, the remaining fifteen tools have no metadata at all.
+The pre-ATS baseline has three quirks the schema must accommodate. First, `AskUserQuestion` already carries a flat `source: string` field. Existing callers emit values like `"remember"`. Second, `TaskCreate` and `TaskUpdate` already have a `metadata` field, but it is user-data: arbitrary content owned by the calling code. Third, the remaining fifteen tools have no metadata at all.
 
-`dgm-telemetry` addresses each. The `source` string is preserved verbatim — the new `source` field at the root of the envelope uses the same key name and a backward-compatible string shape (`schemas/base/base-metadata.schema.json` lines 8-12). When a legacy caller is migrated, the original value is copied into `_compat.legacy_source` (`schemas/goals/backward-compat.schema.json` line 14), so no information is lost.
+`agentic-telemetry-spec` addresses each. The `source` string is preserved verbatim — the new `source` field at the root of the envelope uses the same key name and a backward-compatible string shape (`schemas/base/base-metadata.schema.json` lines 8-12). When a legacy caller is migrated, the original value is copied into `_compat.legacy_source` (`schemas/goals/backward-compat.schema.json` line 14), so no information is lost.
 
-For `TaskCreate` and `TaskUpdate`, where `metadata` is a user-data field, DGM metadata is nested at `metadata._dgm` rather than at the top of `metadata` (`README.md` line 159). The telemetry ingestor must check both locations (`schemas/telemetry/unified-activity-extensions.schema.json` line 66). The `_dgm` prefix is a reserved namespace, signaling to downstream consumers and to users of the `metadata` field that this subtree is owned by the telemetry layer.
+For `TaskCreate` and `TaskUpdate`, where `metadata` is a user-data field, ATS metadata is nested at `metadata._dgm` rather than at the top of `metadata` (`README.md` line 159). The telemetry ingestor must check both locations (`schemas/telemetry/unified-activity-extensions.schema.json` line 66). The `_dgm` prefix is a reserved namespace, signaling to downstream consumers and to users of the `metadata` field that this subtree is owned by the telemetry layer.
 
 Migrated records carry an explicit migration record under `_compat.migrated_from`, including the source tool name, the old schema version (semver-constrained), and an ISO 8601 migration timestamp (`schemas/goals/backward-compat.schema.json` lines 17-37). The `is_legacy_compat` boolean lets telemetry filters distinguish "no metadata because old caller" from "intentionally minimal because Tier 3," which is essential for measuring adoption progress.
 
@@ -236,7 +236,7 @@ Finally, the `_compat.schema_version` field (`schemas/goals/backward-compat.sche
 
 ### 7.1 Cross-Session Agent Comparability
 
-A team running multiple Claude Code sessions across different developers wants to know which agent type produces the most accepted edits. Today, without standardized telemetry, this requires log-spelunking. With `dgm-telemetry`, the team filters `unified-activity.jsonl` for records where `dgm.source` starts with `agent:`, joins to KoTH outcome records, and computes acceptance rates per `caller_name`. The `project_path_hash` provides anonymized project grouping. No agent-side instrumentation is needed beyond the metadata envelope.
+A team running multiple Claude Code sessions across different developers wants to know which agent type produces the most accepted edits. Today, without standardized telemetry, this requires log-spelunking. With `agentic-telemetry-spec`, the team filters `unified-activity.jsonl` for records where `dgm.source` starts with `agent:`, joins to KoTH outcome records, and computes acceptance rates per `caller_name`. The `project_path_hash` provides anonymized project grouping. No agent-side instrumentation is needed beyond the metadata envelope.
 
 ### 7.2 Auditing Tool Invocations for Security Review
 
@@ -301,21 +301,21 @@ The schema suite is designed to plug into four downstream systems, named in the 
 - `<your-elo-engine>` — a service that consumes `koth.outcome_signal` and `koth.agents_in_options` to update per-agent ELO and Beta posteriors.
 - `<your-ab-runner>` — an analytics service that reads `experiment.experiment_id` and `variant_id` to compute variant-level outcome statistics.
 
-`dgm-telemetry` makes no assumptions about the implementation of these components. The schemas are the contract.
+`agentic-telemetry-spec` makes no assumptions about the implementation of these components. The schemas are the contract.
 
 ---
 
 ## 9. Related Work
 
-**OpenTelemetry GenAI semantic conventions** define attributes for LLM spans — model name, token counts, latency, and recently a small set of tool-call attributes. They focus on the *LLM call* as the unit of observation. `dgm-telemetry` operates one level up: the *tool call*, with caller chains, decision joins, and agent-selection signals that OTel GenAI does not model. The two are complementary, not overlapping.
+**OpenTelemetry GenAI semantic conventions** define attributes for LLM spans — model name, token counts, latency, and recently a small set of tool-call attributes. They focus on the *LLM call* as the unit of observation. `agentic-telemetry-spec` operates one level up: the *tool call*, with caller chains, decision joins, and agent-selection signals that OTel GenAI does not model. The two are complementary, not overlapping.
 
-**LangSmith** provides end-to-end tracing for LangChain applications and rich UI for trace inspection. Its data model is vendor-specific and emphasizes chain visualization. `dgm-telemetry` is a vendor-neutral schema that any tracing tool — LangSmith included — could consume or emit. It does not provide a UI; it provides a contract.
+**LangSmith** provides end-to-end tracing for LangChain applications and rich UI for trace inspection. Its data model is vendor-specific and emphasizes chain visualization. `agentic-telemetry-spec` is a vendor-neutral schema that any tracing tool — LangSmith included — could consume or emit. It does not provide a UI; it provides a contract.
 
-**Weights & Biases Weave** focuses on logging LLM calls and evaluations into a managed backend. Like LangSmith, it is a product rather than an open schema. `dgm-telemetry`'s composable goal fragments — particularly the KoTH fragment exposing Beta-distributed Thompson Sampling state — are not part of the Weave data model.
+**Weights & Biases Weave** focuses on logging LLM calls and evaluations into a managed backend. Like LangSmith, it is a product rather than an open schema. `agentic-telemetry-spec`'s composable goal fragments — particularly the KoTH fragment exposing Beta-distributed Thompson Sampling state — are not part of the Weave data model.
 
-**Langfuse** is open-source and ships a documented data model for traces, observations, and scores. The closest overlap is around scoring, where Langfuse exposes a flexible numeric/categorical score per trace. `dgm-telemetry`'s differentiation is the explicit treatment of agent performance through the `koth` fragment, the bidirectional decision-join key with positional `signal_type`, the proportional tier system, and the formally-versioned `_compat` block for backward-compatible adoption.
+**Langfuse** is open-source and ships a documented data model for traces, observations, and scores. The closest overlap is around scoring, where Langfuse exposes a flexible numeric/categorical score per trace. `agentic-telemetry-spec`'s differentiation is the explicit treatment of agent performance through the `koth` fragment, the bidirectional decision-join key with positional `signal_type`, the proportional tier system, and the formally-versioned `_compat` block for backward-compatible adoption.
 
-In short, the existing ecosystem covers *traces of LLM calls* well and *agent performance attribution* less well. `dgm-telemetry` contributes a schema-first treatment of the latter, with explicit interoperability hooks for the former.
+In short, the existing ecosystem covers *traces of LLM calls* well and *agent performance attribution* less well. `agentic-telemetry-spec` contributes a schema-first treatment of the latter, with explicit interoperability hooks for the former.
 
 ---
 
@@ -325,17 +325,17 @@ Standardized telemetry schemas matter for the open-source AI ecosystem for four 
 
 First, **reproducibility**. A session that emits only opaque action logs cannot be replayed. A session whose every tool call carries `session_id`, `caller_chain`, and timestamps can be reconstructed end-to-end from a flat JSONL stream. Reproducibility is the foundation for debugging, regression testing, and incident response.
 
-Second, **interoperability**. As long as telemetry shapes are vendor-specific, every tool — every dashboard, every analytics pipeline, every evaluation harness — must be rewritten per provider. A shared JSON Schema contract decouples emitters from consumers. `dgm-telemetry` is licensed Apache-2.0, the goal fragments are independently consumable, and the suite imposes no runtime dependency on the calling system.
+Second, **interoperability**. As long as telemetry shapes are vendor-specific, every tool — every dashboard, every analytics pipeline, every evaluation harness — must be rewritten per provider. A shared JSON Schema contract decouples emitters from consumers. `agentic-telemetry-spec` is licensed Apache-2.0, the goal fragments are independently consumable, and the suite imposes no runtime dependency on the calling system.
 
 Third, **auditability**. Provenance chains, decision joins, and backward-compatibility migration records collectively answer the question "what happened, who caused it, and why?" These are not optional concerns for systems deployed in regulated environments.
 
-Fourth, **agent performance comparability**. As open-source agent catalogs grow, comparing agents across implementations requires a shared performance vocabulary. `dgm-telemetry`'s KoTH fragment — ELO ratings, Beta-distributed posteriors, domain-routed outcomes — is a candidate shared vocabulary that can be adopted by any agent runtime.
+Fourth, **agent performance comparability**. As open-source agent catalogs grow, comparing agents across implementations requires a shared performance vocabulary. `agentic-telemetry-spec`'s KoTH fragment — ELO ratings, Beta-distributed posteriors, domain-routed outcomes — is a candidate shared vocabulary that can be adopted by any agent runtime.
 
 ---
 
 ## 11. Conclusion
 
-`dgm-telemetry` defines a unified JSON Schema suite for agentic AI telemetry, partitioned into five orthogonal design goals and composed into twenty-four per-tool schemas through a three-tier instrumentation model. The novel contribution is the schema-native treatment of agent performance through the KoTH/Oracle fragment, which places ELO ratings, Thompson Sampling Beta parameters, and outcome signals directly on the tool-call record rather than treating them as opaque downstream concerns. The backward-compatibility design — a dedicated `_compat` fragment, preservation of legacy source strings, reservation of the `metadata._dgm` namespace, and semver gating — addresses adoption in a way that established telemetry schemas typically do not.
+`agentic-telemetry-spec` defines a unified JSON Schema suite for agentic AI telemetry, partitioned into five orthogonal design goals and composed into twenty-four per-tool schemas through a three-tier instrumentation model. The novel contribution is the schema-native treatment of agent performance through the KoTH/Oracle fragment, which places ELO ratings, Thompson Sampling Beta parameters, and outcome signals directly on the tool-call record rather than treating them as opaque downstream concerns. The backward-compatibility design — a dedicated `_compat` fragment, preservation of legacy source strings, reservation of the `metadata._dgm` namespace, and semver gating — addresses adoption in a way that established telemetry schemas typically do not.
 
 Future work falls in three directions. **Multi-tenant isolation** is reserved as `tenant_id` columns in the companion database schema (`SCHEMA_DATABASE.md` line 526) and warrants first-class schema-level support. **Quartermaster (QM) integration** — linking tool calls to externally tracked work items via fields such as `qm_bead_id` (`docs/design-goals.md` lines 133-134) — would close the loop between telemetry and project management. **Additional language SDKs** beyond reference Python tooling — particularly TypeScript and Go bindings generated from the JSON Schemas — would broaden adoption.
 
@@ -345,7 +345,7 @@ The schemas are the contract. The implementation is open.
 
 ## References
 
-All references are file paths within the `dgm-telemetry` repository at version 1.0.0.
+All references are file paths within the `agentic-telemetry-spec` repository at version 1.0.0.
 
 1. `README.md` — Repository overview, problem statement, applicability matrix.
 2. `SCHEMA_DATABASE.md` — Relational database schema for telemetry persistence.

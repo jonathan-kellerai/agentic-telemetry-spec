@@ -1,4 +1,4 @@
-# DGM Telemetry — Design Goals & Seed Schema
+# Agentic Telemetry Spec — Design Goals & Seed Schema
 
 > **Source**: Designed in design session `123e4567-e89b-12d3-a456-426614174000`
 > **Date**: 2026-02-19
@@ -17,6 +17,7 @@ Today only 3 of 18 Claude Code tools carry metadata:
 | `TaskUpdate` | arbitrary object |
 
 The unified telemetry hook (`<your-telemetry-ingestor>`) ignores metadata entirely. There is no standard way to:
+
 - Trace a tool call back to its caller
 - Link it to a decision in `<your-decision-store>.jsonl`
 - Attribute its outcome to an agent's ELO rating
@@ -29,18 +30,23 @@ This specification defines a unified metadata schema for every Claude Code primi
 ## Design Goals
 
 ### 1. Provenance
+
 Trace every tool call to its caller: `session → agent → skill/hook → tool`.
 
 ### 2. A/B Testing
+
 Track named template variants and measure option presentation effects across tool invocations.
 
 ### 3. KOTH/Oracle Integration
+
 Connect tool outcomes to agent ELO ratings (King-of-the-Hill) and Thompson Sampling updates via Oracle.
 
 ### 4. Decision Logger Join
+
 Link tool calls to the `DecisionContext` that triggered them via bidirectional join keys.
 
 ### 5. Backward Compatibility
+
 The existing `source: string` field on `AskUserQuestion` remains parseable. All new fields are optional. No breaking changes to tools that already emit metadata.
 
 ---
@@ -147,17 +153,23 @@ The full metadata object designed as a reference for all 18 tools:
 ## Tool Tier Classification
 
 ### Tier 1 — Full Metadata (All 5 Goals)
+
 Tools that represent significant decisions with measurable outcomes:
+
 - `AskUserQuestion` — user decision with selectable options
 - `Task` — spawns a subagent (agent selection = KOTH signal)
 - `Skill` — invokes a named skill (skill selection = KOTH signal)
 
 ### Tier 2 — Partial Metadata (Provenance + KOTH outcome + Decision join)
+
 Tools that execute consequential actions:
+
 - `Bash`, `Write`, `Edit`, `SendMessage`, `EnterPlanMode`, `ExitPlanMode`
 
 ### Tier 3 — Minimal Metadata (Provenance only + `source` string)
+
 High-frequency read/query tools — metadata bloat risk:
+
 - `Read`, `Glob`, `Grep`, `WebSearch`, `WebFetch`
 - `TaskCreate`, `TaskUpdate`, `TaskList`, `TaskGet`
 - `TeamCreate`, `TeamDelete`, `ToolSearch`

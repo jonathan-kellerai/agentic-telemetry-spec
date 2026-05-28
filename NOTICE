@@ -1,6 +1,6 @@
-dgm-telemetry
+agentic-telemetry-spec
 
-Copyright 2025 Jonathan A. Bowe
+Copyright 2026 Jonathan A. Bowe
 
 This project contains a JSON Schema specification for decision-audit telemetry
 on Claude Code primitives (tool calls, agent sessions, A/B experiments, KoTH

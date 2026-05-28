@@ -23,11 +23,11 @@ Paste the output of the relevant checks you ran locally:
 
   # Compile all schemas
   for schema in schemas/**/*.schema.json; do
-    npx ajv-cli compile -s "$schema"
+    npx ajv-cli compile --spec=draft2020 --strict=false -s "$schema"
   done
 
   # Validate worked examples
-  npx ajv-cli validate -s schemas/base/base-metadata.schema.json \
+  npx ajv-cli validate --spec=draft2020 --strict=false -s schemas/base/base-metadata.schema.json \
     -d examples/tier1-ask-user-question.json
 
   # Sanitization gate

@@ -1,4 +1,4 @@
-# DGM Database Schema — Quick Reference
+# ATS Database Schema — Quick Reference
 
 ## Core Tables (10 primary)
 
@@ -35,7 +35,7 @@
 
 | Table | Purpose | Key Join | Use Case |
 |-------|---------|----------|----------|
-| `tier_transitions` | Track adoption from legacy to DGM | `session_id` | Telemetry adoption metrics |
+| `tier_transitions` | Track adoption from legacy to ATS | `session_id` | Telemetry adoption metrics |
 | `legacy_metadata` | Backward compatibility mappings | `activity_id` | Migration support |
 | (Materialized Views) | Analytics summaries | Various | Reporting + dashboards |
 
@@ -44,32 +44,40 @@
 ## Critical Joins
 
 ### Join 1: Decision Logger (Decision ↔ Activity)
-```
+
+```text
 decisions.decision_id ↔ decision_tool_calls.decision_id ↔ decision_tool_calls.activity_id ↔ activity_records.activity_id
 ```
+
 **Purpose**: Trace which tool calls informed / executed a decision
 **Use Case**: Decision tree reconstruction, decision-driven ELO updates
 
 ### Join 2: KOTH Ratings (Activity ↔ Agent ↔ Rating)
-```
+
+```text
 activity_records.activity_id ↔ koth_outcomes.activity_id ↔ koth_outcomes.outcome_signal
 activity_records.source_caller_name ↔ agents.fully_qualified_name ↔ koth_ratings.agent_id
 ```
+
 **Purpose**: Map tool outcomes to agent ELO changes
 **Use Case**: Agent performance evolution, Oracle recommendation calibration
 
 ### Join 3: A/B Testing (Activity ↔ Experiment)
-```
+
+```text
 activity_records.activity_id ↔ experiment_assignments.activity_id ↔ experiment_variants.variant_id ↔ experiments.experiment_id
 ```
+
 **Purpose**: Segment outcomes by experiment variant
 **Use Case**: A/B result analysis, template iteration
 
 ### Join 4: Provenance Chain (Activity → Session → Entity)
-```
+
+```text
 activity_records.activity_id ↔ provenance.activity_id → provenance.session_id → sessions.session_id
 sessions.project_path_hash ↔ entities.entity_id
 ```
+
 **Purpose**: Full request traceability from activity → session → project
 **Use Case**: Per-project metrics, entity memory joins
 
@@ -78,17 +86,23 @@ sessions.project_path_hash ↔ entities.entity_id
 ## Tier Distribution
 
 ### Tier 1 (Full) — 3 Tools
+
 All 5 goals: Provenance + Experiment + KOTH + Decision + Compat
+
 - **Tools**: AskUserQuestion, Task, Skill
 - **Tables**: activity_records + provenance + experiment_assignments + koth_outcomes + legacy_metadata
 
 ### Tier 2 (Partial) — 6 Tools
+
 Provenance + KOTH + Decision (no A/B testing)
+
 - **Tools**: Bash, Write, Edit, SendMessage, EnterPlanMode, ExitPlanMode
 - **Tables**: activity_records + provenance + koth_outcomes + decision_tool_calls
 
 ### Tier 3 (Minimal) — 9 Tools
+
 Provenance only
+
 - **Tools**: Read, Glob, Grep, WebSearch, WebFetch, TaskCreate, TaskUpdate, TaskList, TaskGet, TeamCreate, TeamDelete, ToolSearch, NotebookEdit, TaskOutput, TaskStop
 - **Tables**: activity_records + provenance
 
@@ -97,6 +111,7 @@ Provenance only
 ## Query Patterns & Recommended Indexes
 
 ### Pattern 1: Recent Activity by Agent
+
 ```sql
 SELECT * FROM activity_records
   JOIN provenance USING (activity_id)
@@ -105,9 +120,11 @@ WHERE source_caller_name = 'morphllm:code-editor'
 ORDER BY invoked_at DESC
 LIMIT 100;
 ```
+
 **Indexes**: `activity_records(invoked_at DESC)`, `provenance(activity_id)`
 
 ### Pattern 2: Agent ELO Evolution
+
 ```sql
 SELECT
   kr.agent_id, kr.domain, kr.elo_rating,
@@ -119,9 +136,11 @@ WHERE kr.agent_id = $1
   AND kr.domain = 'editing'
 ORDER BY ko.outcome_timestamp DESC;
 ```
+
 **Indexes**: `koth_ratings(agent_id, domain)`, `koth_outcomes(activity_id)`
 
 ### Pattern 3: Decision Tree Reconstruction
+
 ```sql
 WITH RECURSIVE decision_tree AS (
   SELECT * FROM decisions WHERE decision_id = $1
@@ -134,9 +153,11 @@ SELECT * FROM decision_tree
   LEFT JOIN activity_records USING (activity_id)
 ORDER BY decision_depth, signal_type;
 ```
+
 **Indexes**: `decisions(decision_id, parent_decision_id)`, `decision_tool_calls(decision_id)`
 
 ### Pattern 4: Experiment Results by Variant
+
 ```sql
 SELECT
   ev.variant_key,
@@ -150,6 +171,7 @@ FROM experiment_variants ev
 WHERE ev.experiment_id = $1
 GROUP BY ev.variant_id, ev.variant_key;
 ```
+
 **Indexes**: `experiment_assignments(variant_id)`, `koth_outcomes(activity_id)`
 
 ---
@@ -157,7 +179,7 @@ GROUP BY ev.variant_id, ev.variant_key;
 ## Data Volume Estimates (Annual, 1000 concurrent sessions)
 
 | Table | Rows/Year | Growth | Notes |
-|-------|-----------|--------|-------|
+| ----- | --------- | ------ | ----- |
 | `sessions` | ~100K | ~1.1 sessions/min avg | 10–100K concurrent |
 | `activity_records` | ~10M | ~1150 calls/min avg | 18 tools × ~60 calls/session |
 | `provenance` | ~10M | Parallel to activity_records | One per activity |
@@ -179,12 +201,14 @@ GROUP BY ev.variant_id, ev.variant_key;
 ### Monitoring Queries
 
 1. **Check data freshness**:
+
    ```sql
    SELECT MAX(invoked_at) as latest_activity, NOW() - MAX(invoked_at) as lag
    FROM activity_records;
    ```
 
 2. **Monitor table sizes**:
+
    ```sql
    SELECT schemaname, tablename, pg_size_pretty(pg_total_relation_size(schemaname||'.'||tablename))
    FROM pg_tables
@@ -193,6 +217,7 @@ GROUP BY ev.variant_id, ev.variant_key;
    ```
 
 3. **Check index efficiency**:
+
    ```sql
    SELECT schemaname, tablename, indexname, idx_scan, idx_tup_read, idx_tup_fetch
    FROM pg_stat_user_indexes
@@ -219,10 +244,10 @@ GROUP BY ev.variant_id, ev.variant_key;
 
 ### Access Control
 
-- Activity records: Read by analytics team, write by <your-telemetry-ingestor> only
-- Decisions: Read by <your-decision-store>, write by <your-decision-store>
-- KOTH ratings: Read by Oracle + agents, write by <your-elo-engine> only
-- Experiments: Read by <your-ab-runner>, write by <your-ab-runner>
+- Activity records: Read by analytics team, write by `your-telemetry-ingestor` only
+- Decisions: Read by `your-decision-store`, write by `your-decision-store`
+- KOTH ratings: Read by Oracle + agents, write by `your-elo-engine` only
+- Experiments: Read by `your-ab-runner`, write by `your-ab-runner`
 - Legacy metadata: Read-only archive, no updates
 
 ---
@@ -231,7 +256,8 @@ GROUP BY ev.variant_id, ev.variant_key;
 
 ### Legacy Caller Handling
 
-Pre-DGM callers with only `source` string field:
+Pre-ATS callers with only `source` string field:
+
 1. Detected by `legacy_metadata.is_legacy_compat = TRUE`
 2. Source string parsed into `provenance` fields
 3. Tier computed as 3 (minimal provenance)
@@ -239,11 +265,11 @@ Pre-DGM callers with only `source` string field:
 
 ### Migration Path
 
-```
+```text
 Legacy source string
   ↓ (parse by <your-telemetry-ingestor>)
   ↓
-DGM provenance block
+ATS provenance block
   ↓ (extract by _dgm_fields())
   ↓
 activity_records.dgm.provenance

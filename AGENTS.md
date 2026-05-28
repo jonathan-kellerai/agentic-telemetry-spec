@@ -1,6 +1,6 @@
-# AGENTS.md — dgm-telemetry
+# AGENTS.md — agentic-telemetry-spec
 
-This repository is the **dgm-telemetry** JSON Schema suite — a standardized
+This repository is the **agentic-telemetry-spec** JSON Schema suite — a standardized
 metadata specification for provenance, A/B testing, KoTH oracle attribution,
 decision logging, and backward-compatibility tracking on agentic AI runs built
 atop Claude Code primitives.
@@ -92,7 +92,7 @@ Deeper guidance — load on demand:
 
 - `docs/agents/conventions.md` — Conventional Commits, branch naming, PR style,
   citation format, the `ajv compile` / `ajv validate` workflow.
-- `docs/agents/citation.md` — how to cite dgm-telemetry (Apache-2.0
+- `docs/agents/citation.md` — how to cite agentic-telemetry-spec (Apache-2.0
   attribution, BibTeX, `CITATION.cff`).
 - `docs/agents/glossary.md` — load-bearing vocabulary (Tier 1/2/3,
   ProvenanceChain, KoTH / Oracle, ELO, Thompson Sampling, `outcome_signal`,

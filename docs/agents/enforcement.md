@@ -1,4 +1,4 @@
-# Enforcement — dgm-telemetry
+# Enforcement — agentic-telemetry-spec
 
 Tier-2 detail for `AGENTS.md`.
 How the conventions are enforced — what is automated, what is gated by review, and what is
@@ -14,7 +14,7 @@ self-protecting.
 | Markdown lint | CI | `markdownlint-cli2` over every Markdown file. |
 | Link check | CI | `lychee` resolves every link. |
 | `commitlint` | CI, on every pull request | Every commit message is a valid Conventional Commit (`commitlint.config.js`). |
-| Conformance policy | CI | The reusable `kellerai-oss-template` workflow evaluates the repository structure. dgm-telemetry calls it via `uses:` pinned to a commit SHA — a policy upgrade only takes effect when the SHA is explicitly bumped. |
+| Conformance policy | CI | The reusable `kellerai-oss-template` workflow evaluates the repository structure. agentic-telemetry-spec calls it via `uses:` pinned to a commit SHA — a policy upgrade only takes effect when the SHA is explicitly bumped. |
 
 The pre-commit hook is managed by `lefthook`.
 Install once with `lefthook install`; it then runs schema compilation and the sanitization gate

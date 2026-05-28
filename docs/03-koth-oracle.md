@@ -71,6 +71,7 @@ When a tool is called:
 ### Phase 2: Tool Execution
 
 Tool executes. Result can be:
+
 - **Success** (`is_error: false` in tool_result)
 - **Failure** (`is_error: true`)
 - **Partial success** (UAEF evaluation with assertion pass/fail breakdown → `weighted_success`)
@@ -93,7 +94,7 @@ Tool executes. Result can be:
    - Update `koth.outcome_signal` in tool telemetry record
    - Append to `koth-agent-matches.jsonl` (extractor input format)
 
-### Phase 4: ELO Update (<your-elo-engine>)
+### Phase 4: ELO Update (`your-elo-engine`)
 
 `extractor.py` reads `koth-agent-matches.jsonl`:
 
@@ -115,6 +116,7 @@ for match in matches:
 ```
 
 `<your-elo-engine>` updates:
+
 - **Elo rating**: Traditional Elo formula with K-factor weighting
 - **Thompson Sampling parameters**: Beta(alpha, beta) distribution
   - `alpha` += 1 for wins (successes)
@@ -135,6 +137,7 @@ Oracle should be consulted **before** any tool invocation where agent selection 
 3. **Skill tool with multiple agent implementations**: Choosing between competing skill variants
 
 Oracle consultation is **optional** for:
+
 - Read-only tools (Read, Grep, Glob, WebSearch)
 - Deterministic tools with no agent choice (Write, Edit with fixed strategy)
 - Tools where outcome is independent of agent selection
@@ -178,6 +181,7 @@ Thompson Sampling uses **Beta distributions** to model each agent's success prob
 - **Confidence**: Posterior mean = α / (α + β)
 
 When Oracle samples:
+
 1. For each candidate agent, draw a random value from Beta(α, β)
 2. Select the agent with the highest sampled value
 3. Return sampled value as `oracle_recommendation_confidence`
@@ -185,6 +189,7 @@ When Oracle samples:
 **Key insight**: Confidence balances **exploitation** (high mean) vs **exploration** (high variance). Agents with few matches have wide distributions (high variance) → occasionally sample high values → get tested. Proven agents have narrow distributions (low variance) → consistently sample near their true performance.
 
 Formula for credible interval (95%):
+
 ```python
 mean = alpha / (alpha + beta)
 std = sqrt(alpha * beta / (n^2 * (n + 1)))  # n = alpha + beta
@@ -228,6 +233,7 @@ interval = (mean - 1.96*std, mean + 1.96*std)
 ```
 
 PostToolUse hook extracts:
+
 - **Winner**: Selected agent → `outcome_signal = "win"`, alpha += 1
 - **Losers**: Unselected agents in `agents_in_options` → `outcome_signal = "loss"`, beta += 1
 
@@ -307,6 +313,7 @@ def determine_outcome_signal(tool_result, tool_name):
 3. **User validation required**: Tool call requests user review before marking success/failure
 
 Pending signals are resolved by:
+
 - **UAEF hook**: Reads eval results, updates `outcome_signal` in telemetry
 - **SessionEnd hook**: Final reconciliation of deferred outcomes
 
@@ -319,9 +326,11 @@ Pending signals are resolved by:
 **Tools**: AskUserQuestion, Task, Skill
 
 **Fields populated**:
+
 - All 7 koth fields (oracle_consulted, oracle_recommended_agent, oracle_recommendation_confidence, agents_in_options, koth_domain, outcome_signal, question_type)
 
 **Use case**: These tools represent **agent selection decisions** with measurable outcomes. Full KOTH context enables:
+
 - Oracle consultation before invocation
 - Training data generation via `agents_in_options`
 - ELO updates based on tool execution success
@@ -331,6 +340,7 @@ Pending signals are resolved by:
 **Tools**: Bash, Write, Edit, SendMessage, EnterPlanMode, ExitPlanMode
 
 **Fields populated**:
+
 - `oracle_consulted: false` (Oracle not queried)
 - `oracle_recommended_agent: null`
 - `oracle_recommendation_confidence: null`
@@ -340,6 +350,7 @@ Pending signals are resolved by:
 - `question_type: null`
 
 **Use case**: These tools execute **consequential actions** but don't involve agent selection. Outcome signals feed into:
+
 - Project-level success metrics (beads issue closure correlation)
 - Agent performance attribution (if executed within a Task/Skill context)
 - Decision Logger outcome tracking
@@ -349,6 +360,7 @@ Pending signals are resolved by:
 **Tools**: Read, Glob, Grep, WebSearch, WebFetch, TaskCreate, TaskUpdate, TaskList, TaskGet, TeamCreate, TeamDelete, ToolSearch, NotebookEdit, TaskOutput, TaskStop
 
 **Rationale**: High-frequency read/query tools with minimal outcome signal. Adding koth metadata creates:
+
 - Context bloat (thousands of Read calls per session)
 - Noisy training data (read failures rarely actionable)
 - Marginal value (outcomes don't drive agent selection)
@@ -379,12 +391,14 @@ The `koth` block links to DecisionLogger via the `decision` metadata block:
 ```
 
 **Bidirectional join**:
+
 - DecisionContext → tool call (via `decision_id`)
 - Tool call → ELO update (via `koth.outcome_signal`)
 - ELO update → Thompson Sampling priors (via DecisionLogger entity memory)
 
 **Agno-style preference learning**:
 `<your-elo-engine>` calls `<your-decision-store>.get_thompson_sampling_weights()` to apply preference-based adjustments:
+
 ```python
 alpha_adj, beta_adj = <your-decision-store>.get_thompson_sampling_weights(
     agent="morphllm:code-editor",
@@ -444,7 +458,8 @@ oracle_result = oracle.query(
 ### 3. Tool Execution
 
 MorphLLM code-editor subagent executes. Subagent log shows:
-```
+
+```text
 ✓ Refactored AuthService to use constructor injection
 ✓ Updated tests to pass DI container
 ✓ All 47 tests passing
@@ -488,6 +503,7 @@ for match in matches:
 ### 7. Next Oracle Query
 
 Next time user asks for code editing:
+
 ```python
 oracle.query(candidates=[...])
 # morphllm:code-editor now has higher alpha → higher sampled values → more likely to be recommended

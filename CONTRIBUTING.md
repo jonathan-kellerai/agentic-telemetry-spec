@@ -1,7 +1,7 @@
-# Contributing to dgm-telemetry
+# Contributing to agentic-telemetry-spec
 
 Thank you for your interest in contributing.
-dgm-telemetry is a JSON Schema specification — contributions are schema edits, example updates,
+agentic-telemetry-spec is a JSON Schema specification — contributions are schema edits, example updates,
 and documentation improvements, not code changes.
 Please follow these guidelines to ensure a smooth contribution process.
 
@@ -15,7 +15,6 @@ Please follow these guidelines to ensure a smooth contribution process.
    - `docs/agents/enforcement.md` — CI gates, CODEOWNERS, pre-commit hook, semver discipline
    - `docs/agents/glossary.md` — load-bearing vocabulary (Tier 1/2/3, KoTH, Oracle, ELO, etc.)
 3. If you are an AI agent, start at `AGENTS.md` rather than this file.
-
 
 ## Filing Issues
 
@@ -32,15 +31,19 @@ Example issue title: `Schema: bash.schema.json — session_id format should use 
 
 1. **Fork** this repository.
 2. **Create a feature branch** from `main`:
-   ```
+
+   ```bash
    git checkout -b fix/provenance-schema-typo
    ```
+
 3. **Make your changes** to the relevant schema files, examples, or documentation.
 4. **Validate your schemas** (see Schema Validation below).
 5. **Commit with a clear message** referencing the issue if applicable:
-   ```
+
+   ```text
    fix: correct type annotation in decision.schema.json (#42)
    ```
+
 6. **Push to your fork** and open a pull request against `main`.
 
 ## Schema Validation
@@ -48,20 +51,23 @@ Example issue title: `Schema: bash.schema.json — session_id format should use 
 All JSON Schema files must be valid against JSON Schema draft 2020-12.
 
 To validate a single schema:
+
 ```bash
-ajv compile -s schemas/goals/provenance.schema.json
+ajv compile --spec=draft2020 --strict=false -s schemas/goals/provenance.schema.json
 ```
 
 To validate all schemas:
+
 ```bash
 for schema in schemas/**/*.schema.json; do
-  ajv compile -s "$schema" || exit 1
+  ajv compile --spec=draft2020 --strict=false -s "$schema" || exit 1
 done
 ```
 
 To validate an example against a schema:
+
 ```bash
-ajv validate -s schemas/tools/bash.schema.json -d examples/tier2-bash.json
+ajv validate --spec=draft2020 --strict=false -s schemas/tools/bash.schema.json -d examples/tier2-bash.json
 ```
 
 All schema changes must pass `ajv compile` before a PR will be merged.

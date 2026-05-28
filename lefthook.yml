@@ -1,4 +1,4 @@
-# Lefthook git hooks for dgm-telemetry.
+# Lefthook git hooks for agentic-telemetry-spec.
 # Install locally with: lefthook install
 #
 # Pre-commit runs the lightweight artifact + sanitization gates. The full

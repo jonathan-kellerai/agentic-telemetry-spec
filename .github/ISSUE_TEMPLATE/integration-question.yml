@@ -1,12 +1,12 @@
 name: Integration question
-description: Ask how to wire the dgm-telemetry schemas into your telemetry pipeline or agent build.
+description: Ask how to wire the agentic-telemetry-spec schemas into your telemetry pipeline or agent build.
 title: "[integration] "
 labels: ["question", "integration"]
 body:
   - type: markdown
     attributes:
       value: |
-        Use this for questions about integrating the dgm-telemetry metadata
+        Use this for questions about integrating the agentic-telemetry-spec metadata
         schemas into your own `<your-telemetry-ingestor>`, ELO engine, A/B
         runner, or decision store. For defects in the schemas themselves, use
         the schema-bug template instead.

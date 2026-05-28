@@ -9,11 +9,13 @@
 ## What Provenance Solves
 
 Today, `<your-telemetry-ingestor>` has no way to answer:
+
 - Which skill invoked this `AskUserQuestion`?
 - Which subagent called `Bash`?
 - What's the full call chain from user prompt to tool execution?
 
 The `provenance` object provides a complete identity chain for every tool call, enabling:
+
 - **Traceability**: Link tool calls back to skills, agents, hooks, or main orchestrator
 - **Agent accountability**: Join tool outcomes to agent instance UUIDs for ELO attribution
 - **Cross-session memory**: Join by `project_path_hash` without exposing absolute paths
@@ -24,27 +26,32 @@ The `provenance` object provides a complete identity chain for every tool call, 
 ## Schema Field Reference
 
 ### `session_id` (string, required)
+
 UUID of the Claude Code session. Matches `session_id` in `<your-telemetry-ingestor>` `_base_record()`.
 
 **Format**: UUID
 **Example**: `"123e4567-e89b-12d3-a456-426614174000"`
 
 ### `agent_id` (string | null, optional)
+
 UUID of the spawned subagent instance. Null for main orchestrator. Matches `agent_id` in `SubagentStart`/`SubagentStop` events.
 
 **Format**: UUID
 **Example**: `"ae02e3e1-4f7b-4d9c-8cc8-1a2b3c4d5e6f"` (subagent), `null` (main)
 
 ### `caller_type` (string, required)
+
 Type of the immediate caller.
 
 **Enum**: `"skill"` | `"agent"` | `"hook"` | `"main"`
 **Example**: `"skill"`
 
 ### `caller_name` (string, required)
+
 Fully-qualified name of the immediate caller.
 
 **Format varies by `caller_type`**:
+
 - **skill**: `"plugin:skill"` (e.g., `"feature-dev:feature-dev"`)
 - **agent**: agent type name (e.g., `"code-architect"`)
 - **hook**: hook event name (e.g., `"UserPromptSubmit"`)
@@ -53,10 +60,12 @@ Fully-qualified name of the immediate caller.
 **Example**: `"feature-dev:feature-dev"`
 
 ### `caller_chain` (array of objects, optional)
+
 Parent callers from outermost to immediate. Each item has `caller_type`, `caller_name`, and optional `agent_id`. Empty array for top-level calls.
 
 **Default**: `[]`
 **Example**:
+
 ```json
 [
   {
@@ -73,6 +82,7 @@ Parent callers from outermost to immediate. Each item has `caller_type`, `caller
 ```
 
 ### `project_path_hash` (string | null, optional)
+
 First 8 characters of `SHA256(project_path)`. Enables entity memory joins without exposing absolute paths in telemetry.
 
 **Format**: `^[0-9a-f]{8}$`
@@ -81,6 +91,7 @@ First 8 characters of `SHA256(project_path)`. Enables entity memory joins withou
 Matches `EntityMemory.entity_id` hashing pattern in `<your-decision-store>`.
 
 ### `timestamp_utc` (string | null, optional)
+
 ISO 8601 datetime when the tool was called (UTC timezone).
 
 **Format**: ISO 8601 date-time
@@ -129,6 +140,7 @@ def _base_record(hook_input: dict[str, Any]) -> dict[str, Any]:
 **CRITICAL**: `caller_chain` must be set at **call time**, not post-hoc.
 
 ### Top-level tool call (from main orchestrator)
+
 ```json
 {
   "session_id": "123e4567-e89b-12d3-a456-426614174000",
@@ -140,6 +152,7 @@ def _base_record(hook_input: dict[str, Any]) -> dict[str, Any]:
 ```
 
 ### Skill calling a tool
+
 ```json
 {
   "session_id": "123e4567-e89b-12d3-a456-426614174000",
@@ -151,6 +164,7 @@ def _base_record(hook_input: dict[str, Any]) -> dict[str, Any]:
 ```
 
 ### Subagent calling a tool
+
 ```json
 {
   "session_id": "123e4567-e89b-12d3-a456-426614174000",
@@ -168,6 +182,7 @@ def _base_record(hook_input: dict[str, Any]) -> dict[str, Any]:
 ```
 
 ### Nested: main → agent → skill → tool
+
 ```json
 {
   "session_id": "123e4567-e89b-12d3-a456-426614174000",
@@ -206,6 +221,7 @@ def _base_record(hook_input: dict[str, Any]) -> dict[str, Any]:
 ## Example Provenance Objects by Tier
 
 ### Tier 1 Example (AskUserQuestion from skill)
+
 ```json
 {
   "session_id": "123e4567-e89b-12d3-a456-426614174000",
@@ -219,6 +235,7 @@ def _base_record(hook_input: dict[str, Any]) -> dict[str, Any]:
 ```
 
 ### Tier 2 Example (Bash from subagent)
+
 ```json
 {
   "session_id": "123e4567-e89b-12d3-a456-426614174000",
@@ -238,6 +255,7 @@ def _base_record(hook_input: dict[str, Any]) -> dict[str, Any]:
 ```
 
 ### Tier 3 Example (Read from hook)
+
 ```json
 {
   "session_id": "f7a3c8d1-2b4e-4a5f-9c8d-7e6f5a4b3c2d",

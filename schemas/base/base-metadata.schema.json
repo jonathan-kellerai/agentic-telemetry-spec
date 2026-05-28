@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "base-metadata.schema.json",
-  "title": "DGM Base Metadata",
+  "title": "ATS Base Metadata",
   "description": "Extensible base metadata schema inherited by all Claude Code tool schemas. Every tool carries at minimum 'source' and 'provenance'; Tier 1 tools carry all 5 goal fragments.",
   "type": "object",
   "properties": {

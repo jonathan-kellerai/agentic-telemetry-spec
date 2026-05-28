@@ -1,13 +1,13 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "unified-activity-extensions.schema.json",
-  "title": "DGM Unified Activity Extensions",
-  "description": "New fields to add to existing unified-activity.jsonl records. All DGM fields are nested under the top-level 'dgm' key to avoid collision with existing fields (session_id, tool_name, ts, agent_id, etc.). Additive-only: no existing unified-activity fields are removed or renamed.",
+  "title": "ATS Unified Activity Extensions",
+  "description": "New fields to add to existing unified-activity.jsonl records. All ATS fields are nested under the top-level 'dgm' key to avoid collision with existing fields (session_id, tool_name, ts, agent_id, etc.). Additive-only: no existing unified-activity fields are removed or renamed.",
   "type": "object",
   "properties": {
     "dgm": {
       "type": "object",
-      "description": "DGM telemetry metadata block. Populated by <your-telemetry-ingestor> _dgm_fields() function from the tool call's metadata parameter.",
+      "description": "ATS telemetry metadata block. Populated by <your-telemetry-ingestor> _dgm_fields() function from the tool call's metadata parameter.",
       "properties": {
         "source": {
           "type": "string",
@@ -53,7 +53,7 @@
         },
         "has_legacy_compat": {
           "type": "boolean",
-          "description": "True if _compat.is_legacy_compat=true or if the metadata was produced by a pre-DGM caller. Enables telemetry filtering to distinguish adoption progress."
+          "description": "True if _compat.is_legacy_compat=true or if the metadata was produced by a pre-ATS caller. Enables telemetry filtering to distinguish adoption progress."
         }
       },
       "required": ["source", "provenance", "tier"],
@@ -63,7 +63,7 @@
   "notes": {
     "existing_fields_preserved": "All existing unified-activity.schema.json fields (session_id, tool_name, ts, agent_id, tool_input, tool_result, etc.) remain unchanged.",
     "extraction_hook": "<your-telemetry-ingestor> PostToolUse: call _dgm_fields(tool_metadata) → populate record['dgm'].",
-    "task_create_update_special": "For TaskCreate/TaskUpdate, DGM metadata is at tool_input.metadata._dgm (not tool_input.metadata directly). <your-telemetry-ingestor> must check both locations.",
+    "task_create_update_special": "For TaskCreate/TaskUpdate, ATS metadata is at tool_input.metadata._dgm (not tool_input.metadata directly). <your-telemetry-ingestor> must check both locations.",
     "outcome_signal_update": "koth.outcome_signal starts as 'pending' at PreToolUse and is updated to 'win'/'loss'/'draw' at PostToolUse based on tool result.",
     "schema_version": "1.0.0"
   },

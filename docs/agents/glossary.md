@@ -1,6 +1,6 @@
-# Glossary — dgm-telemetry
+# Glossary — agentic-telemetry-spec
 
-Load-bearing vocabulary for the dgm-telemetry schema suite — one entry per term.
+Load-bearing vocabulary for the agentic-telemetry-spec schema suite — one entry per term.
 Definitions are extracted from `docs/design-goals.md`, the goal docs
 (`docs/01-*.md` … `docs/05-*.md`), and the schema files themselves; see those
 sources for full detail. This is a Tier-2 reference — `AGENTS.md` points here.
@@ -86,7 +86,7 @@ evolve in its own file without a monolithic document.
 
 ## _compat / backward compatibility
 
-The `_compat` fragment namespaces migration metadata so the DGM standard can
+The `_compat` fragment namespaces migration metadata so the ATS standard can
 coexist with legacy metadata shapes indefinitely. It holds `schema_version`
 (semver — gates migration logic), `legacy_source` (preserves the original
 `AskUserQuestion` `source` string), and `migrated_from` (tool name, old version,
@@ -95,7 +95,7 @@ changes require a new major version.
 
 ## is_legacy_compat / has_legacy_compat
 
-A boolean distinguishing a genuine pre-DGM caller from an intentionally minimal
+A boolean distinguishing a genuine pre-ATS caller from an intentionally minimal
 Tier 3 implementation. `is_legacy_compat` lives in the `_compat` fragment;
 `has_legacy_compat` is its computed mirror on the persisted
 `unified-activity-extensions` record. `true` = a legacy caller with unreliable

@@ -1,4 +1,4 @@
-# Conventions — dgm-telemetry
+# Conventions — agentic-telemetry-spec
 
 Tier-2 detail for `AGENTS.md`.
 This is the authoritative source for commit, branch, PR, citation, and validation conventions.

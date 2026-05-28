@@ -1,6 +1,6 @@
-# DGM Evolution Telemetry — Database Schema
+# ATS Evolution Telemetry — Database Schema
 
-> **Complete relational database schema for supporting the full suite of DGM metadata across all 18 Claude Code tools, enabling provenance tracing, A/B testing, KOTH/Oracle attribution, decision joins, and agent performance evolution.**
+> **Complete relational database schema for supporting the full suite of ATS metadata across all 18 Claude Code tools, enabling provenance tracing, A/B testing, KOTH/Oracle attribution, decision joins, and agent performance evolution.**
 
 ---
 
@@ -52,7 +52,7 @@ CREATE INDEX idx_agents_name ON agents(fully_qualified_name);
 
 ### 3. Tool Calls (Activity Records)
 
-Core telemetry records — extends unified_activity.jsonl with DGM metadata.
+Core telemetry records — extends unified_activity.jsonl with ATS metadata.
 
 ```sql
 CREATE TABLE activity_records (
@@ -72,13 +72,13 @@ CREATE TABLE activity_records (
   tool_result JSONB,
   tool_status VARCHAR(32),  -- success | error | timeout
 
-  -- DGM fields (conditional by tier)
-  dgm_source VARCHAR(255),  -- Format: {caller_type}:{caller_name}
-  dgm_tier INT NOT NULL,  -- Computed from which goal blocks present
-  dgm_has_legacy_compat BOOLEAN DEFAULT FALSE,
+  -- ATS fields (conditional by tier)
+  ats_source VARCHAR(255),  -- Format: {caller_type}:{caller_name}
+  ats_tier INT NOT NULL,  -- Computed from which goal blocks present
+  ats_has_legacy_compat BOOLEAN DEFAULT FALSE,
 
   CONSTRAINT valid_tier CHECK (tool_tier IN (1, 2, 3)),
-  CONSTRAINT valid_dgm_tier CHECK (dgm_tier IN (1, 2, 3))
+  CONSTRAINT valid_ats_tier CHECK (ats_tier IN (1, 2, 3))
 );
 
 CREATE INDEX idx_activity_session ON activity_records(session_id);
@@ -385,7 +385,7 @@ CREATE INDEX idx_decision_calls_signal ON decision_tool_calls(signal_type);
 
 ### 15. Tier Transition Metrics
 
-Tracking adoption progress from pre-DGM to full Tier 1 coverage.
+Tracking adoption progress from pre-ATS to full Tier 1 coverage.
 
 ```sql
 CREATE TABLE tier_transitions (
@@ -411,20 +411,20 @@ CREATE INDEX idx_transitions_session ON tier_transitions(session_id);
 
 ### 16. Legacy Metadata Mappings
 
-For callers migrating from pre-DGM metadata format.
+For callers migrating from pre-ATS metadata format.
 
 ```sql
 CREATE TABLE legacy_metadata (
   legacy_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   activity_id UUID NOT NULL REFERENCES activity_records(activity_id) ON DELETE CASCADE,
 
-  -- Legacy source field (original format before DGM)
+  -- Legacy source field (original format before ATS)
   legacy_source_string VARCHAR(255),
 
-  -- Whether this record came from pre-DGM caller
+  -- Whether this record came from pre-ATS caller
   is_legacy_compat BOOLEAN DEFAULT FALSE,
 
-  -- Mapping to DGM fields
+  -- Mapping to ATS fields
   migrated_to_tier INT,
   migration_timestamp TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
@@ -513,7 +513,8 @@ CREATE INDEX idx_session_summary_session ON session_activity_summary(session_id)
 
 **Date**: 2026-03-09
 
-**Supported DGM Goals**:
+**Supported ATS Goals**:
+
 - Provenance (Goal 1) ✅
 - A/B Testing (Goal 2) ✅
 - KOTH/Oracle (Goal 3) ✅
@@ -521,6 +522,7 @@ CREATE INDEX idx_session_summary_session ON session_activity_summary(session_id)
 - Backward Compatibility (Goal 5) ✅
 
 **Future Extensions** (reserved columns, migration notes):
+
 - `L7_semantic`: Semantic clustering data (reserved in activity_records)
 - `L8_data_leakage`: Data leakage signals (reserved in activity_records)
 - Multi-tenant isolation: `tenant_id` (reserved in all core tables)
@@ -559,6 +561,7 @@ CREATE TABLE activity_records_2026_01 PARTITION OF activity_records
 ## Validation Constraints
 
 All constraints listed above enforce:
+
 1. Data integrity (NOT NULL, UNIQUE, FOREIGN KEY)
 2. Domain validity (CHECK constraints on enums)
 3. Format compliance (PATTERN constraints for UUIDs, semver, decision IDs)
@@ -567,12 +570,13 @@ All constraints listed above enforce:
 
 ---
 
-## Integration with DGM Metadata Extraction
+## Integration with ATS Metadata Extraction
 
 The database is designed to be populated by:
-1. **<your-telemetry-ingestor>** → `_dgm_fields()` extracts metadata
-2. **<your-decision-store>** → Inserts `decisions` and joins to `activity_records`
-3. **<your-elo-engine>** → Updates `koth_ratings` based on outcome signals
-4. **<your-ab-runner>** → Records `experiment_assignments` and variant metrics
+
+1. **`your-telemetry-ingestor`** → `_dgm_fields()` extracts metadata
+2. **`your-decision-store`** → Inserts `decisions` and joins to `activity_records`
+3. **`your-elo-engine`** → Updates `koth_ratings` based on outcome signals
+4. **`your-ab-runner`** → Records `experiment_assignments` and variant metrics
 
 All extraction functions should use **parameterized queries** to prevent injection and ensure data consistency.

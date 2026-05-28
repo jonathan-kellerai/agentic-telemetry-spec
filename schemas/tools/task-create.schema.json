@@ -2,11 +2,11 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "task-create.schema.json",
   "title": "TaskCreate Metadata — Tier 3 (Minimal, special nesting)",
-  "description": "Minimal metadata for the TaskCreate tool. IMPORTANT: TaskCreate already uses a 'metadata' parameter as an arbitrary user-data object. DGM metadata MUST be nested under the '_dgm' key within that existing metadata object to avoid collision. This schema describes the shape of metadata._dgm.",
+  "description": "Minimal metadata for the TaskCreate tool. IMPORTANT: TaskCreate already uses a 'metadata' parameter as an arbitrary user-data object. ATS metadata MUST be nested under the '_dgm' key within that existing metadata object to avoid collision. This schema describes the shape of metadata._dgm.",
   "allOf": [{ "$ref": "../base/base-metadata.schema.json" }],
   "required": ["source", "provenance"],
   "notes": {
-    "nesting_collision": "TaskCreate's existing 'metadata' field is user-controlled. DGM fields go at metadata._dgm.source, metadata._dgm.provenance — NOT at the top level of the metadata object.",
+    "nesting_collision": "TaskCreate's existing 'metadata' field is user-controlled. ATS fields go at metadata._dgm.source, metadata._dgm.provenance — NOT at the top level of the metadata object.",
     "example_call": "TaskCreate({ subject: '...', description: '...', metadata: { _dgm: { source: 'skill:...', provenance: { session_id: '...', caller_type: 'skill', caller_name: '...' } }, ...user_data } })",
     "koth": "NOT applicable for TaskCreate — omit.",
     "decision": "NOT applicable for TaskCreate — omit."

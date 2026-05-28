@@ -67,6 +67,7 @@ Key insight: `decision_id` is set **at call time** by the caller (who knows the 
 **Null When**: No active decision context (ad-hoc tool calls, hooks)
 
 **Example**:
+
 ```json
 "decision_id": "dec_20260219_143022_123456"
 ```
@@ -91,6 +92,7 @@ Enables queries like "show all editing decisions that failed" without loading fu
 **Why SHA256?** Matches `EntityMemory.entity_id` hashing in `<your-decision-store>:301-311`. Enables joins to entity preferences without exposing absolute paths in telemetry.
 
 **Example**:
+
 ```python
 # <your-decision-store>:301
 key = f"project:{decision.project_path}"
@@ -101,6 +103,7 @@ entity_id = hashlib.sha256(decision.project_path.encode()).hexdigest()[:8]
 
 **Type**: Position marker in decision lifecycle
 **Values**:
+
 - `pre_decision`: Tool calls that **inform** the decision (Read, Grep, WebSearch)
 - `post_decision`: Actions **taken after** decision (Write, Edit, Bash, SendMessage)
 - `outcome`: Result signals (TaskUpdate status=completed, error events)
@@ -108,6 +111,7 @@ entity_id = hashlib.sha256(decision.project_path.encode()).hexdigest()[:8]
 **Purpose**: Distinguish exploration from execution from results when reconstructing decision flows.
 
 **Example**:
+
 ```json
 // Read call before decision
 {"tool": "Read", "metadata": {"decision": {"signal_type": "pre_decision"}}}
@@ -126,7 +130,8 @@ entity_id = hashlib.sha256(decision.project_path.encode()).hexdigest()[:8]
 **Null When**: Top-level decision (no parent)
 
 **Example Hierarchy**:
-```
+
+```text
 Decision A (parent_decision_id: null)
   → Tool: Task (spawns subagent)
     → Decision B (parent_decision_id: A's decision_id)
@@ -234,6 +239,7 @@ call_tool("Write", {
 1. **Privacy**: Telemetry files (unified-activity.jsonl) may be shared across sessions or exported for analysis. Hashing prevents leaking absolute paths like `/Users/alice/secret-client-project`.
 
 2. **Consistency**: `EntityMemory` in `<your-decision-store>:97-125` uses the same hash for project-level preference tracking:
+
    ```python
    key = f"project:{decision.project_path}"
    entity_id = hashlib.sha256(decision.project_path.encode()).hexdigest()[:8]
@@ -250,6 +256,7 @@ entity_id = hashlib.sha256(project_path.encode()).hexdigest()[:8]
 ```
 
 Tool call metadata:
+
 ```json
 {
   "tool": "Write",
@@ -263,6 +270,7 @@ Tool call metadata:
 ```
 
 EntityMemory record:
+
 ```json
 {
   "project:a3f9b2c1": {
@@ -281,6 +289,7 @@ EntityMemory record:
 ### Scenario: Main session spawns a subagent
 
 1. **Main session decides to spawn Explore agent**:
+
    ```json
    {
      "decision_id": "dec_20260219_143022_123456",
@@ -291,6 +300,7 @@ EntityMemory record:
    ```
 
 2. **Task tool call to spawn Explore**:
+
    ```json
    {
      "tool": "Task",
@@ -305,6 +315,7 @@ EntityMemory record:
    ```
 
 3. **Explore agent makes its own decision** (nested):
+
    ```json
    {
      "decision_id": "dec_20260219_144530_789012",
@@ -315,6 +326,7 @@ EntityMemory record:
    ```
 
 4. **Explore agent calls morphllm:code-editor**:
+
    ```json
    {
      "tool": "mcp__archangel__morph_edit_file",

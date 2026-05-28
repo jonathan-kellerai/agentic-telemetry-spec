@@ -24,7 +24,7 @@ projects.
 Use **GitHub Security Advisories** for this repository:
 
 1. Navigate to
-   `https://github.com/jonathan-kellerai/dgm-telemetry/security/advisories/new`
+   `https://github.com/jonathan-kellerai/agentic-telemetry-spec/security/advisories/new`
 2. Describe the schema field or design pattern that creates the risk.
 3. Include a concrete example of how a naive implementation would expose PII or
    leak sensitive data if it followed the schema as written.

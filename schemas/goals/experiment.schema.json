@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "experiment.schema.json",
-  "title": "DGM Experiment Goal — A/B Testing Context",
+  "title": "ATS Experiment Goal — A/B Testing Context",
   "description": "Tracks A/B test context for tool invocations. All fields optional; the entire 'experiment' key is omitted for non-experimental calls. Signals carry 1.5x weight in KOTH ELO calculations due to controlled conditions.",
   "type": "object",
   "properties": {

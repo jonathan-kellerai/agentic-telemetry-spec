@@ -45,6 +45,7 @@ Templates group "same question, different presentation" calls for analysis.
 ```
 
 **Variants**:
+
 - `"markdown-enabled"` — shows code preview with syntax highlighting
 - `"text-only"` — plain text options only
 
@@ -53,6 +54,7 @@ Both variants ask the *same* question; the A/B test measures whether preview aff
 ### When to Bump Version
 
 Bump `template_version` when:
+
 - Option framing changes ("Approach A" → "Streaming approach")
 - Option ordering changes (randomization vs alphabetical)
 - Presentation format changes (list → table)

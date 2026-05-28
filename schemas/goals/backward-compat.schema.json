@@ -1,13 +1,13 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "backward-compat.schema.json",
-  "title": "DGM Backward Compatibility Fragment",
+  "title": "ATS Backward Compatibility Fragment",
   "description": "Migration provenance and legacy value preservation during schema evolution. Tracks schema version and preserves legacy source strings when migrating from existing metadata shapes.",
   "type": "object",
   "properties": {
     "schema_version": {
       "type": "string",
-      "description": "Semver of the DGM metadata schema version in use (e.g., '1.0.0'). Required when _compat block is present.",
+      "description": "Semver of the ATS metadata schema version in use (e.g., '1.0.0'). Required when _compat block is present.",
       "pattern": "^\\d+\\.\\d+\\.\\d+$"
     },
     "legacy_source": {
@@ -24,7 +24,7 @@
         },
         "old_schema_version": {
           "type": "string",
-          "description": "Semver of the schema being migrated from (e.g., '0.9.0' for pre-DGM metadata).",
+          "description": "Semver of the schema being migrated from (e.g., '0.9.0' for pre-ATS metadata).",
           "pattern": "^\\d+\\.\\d+\\.\\d+$"
         },
         "migration_date": {
@@ -38,7 +38,7 @@
     },
     "is_legacy_compat": {
       "type": "boolean",
-      "description": "True if this record was produced by a caller that hasn't adopted DGM metadata yet. Allows telemetry to distinguish 'no metadata' (old caller) from 'intentionally minimal' (Tier 3). Default: false."
+      "description": "True if this record was produced by a caller that hasn't adopted ATS metadata yet. Allows telemetry to distinguish 'no metadata' (old caller) from 'intentionally minimal' (Tier 3). Default: false."
     }
   },
   "required": ["schema_version"],

@@ -1,4 +1,4 @@
-# DGM Telemetry — Metadata Schema Specification
+# Agentic Telemetry Spec — Metadata Schema Specification
 
 > **Formal JSON Schema + companion docs for metadata on all 24 Claude Code primitives.**
 > Enables provenance tracing, A/B testing, KOTH/Oracle attribution, decision joins, and backward-compatible migration.
@@ -45,8 +45,8 @@ A unified metadata schema with 5 design goals, applied at 3 tiers based on tool 
 
 ## Directory Structure
 
-```
-dgm-telemetry/
+```text
+agentic-telemetry-spec/
 ├── schemas/
 │   ├── base/
 │   │   └── base-metadata.schema.json    # Extensible base all tools inherit
@@ -83,7 +83,7 @@ dgm-telemetry/
 
 ## Architecture
 
-```
+```text
 Claude Code Tool Call
        │
        ▼
@@ -154,7 +154,7 @@ Claude Code Tool Call
 
 **Legend**: ✅ req = required, ⭕ opt = optional, ❌ n/a = not applicable (omit)
 
-⚠️ **TaskCreate / TaskUpdate collision**: These tools use `metadata` as a user-data field. DGM metadata nests at `metadata._dgm` — not at the top level of the metadata object. See `docs/05-backward-compat.md`.
+⚠️ **TaskCreate / TaskUpdate collision**: These tools use `metadata` as a user-data field. ATS metadata nests at `metadata._dgm` — not at the top level of the metadata object. See `docs/05-backward-compat.md`.
 
 ---
 
@@ -162,13 +162,13 @@ Claude Code Tool Call
 
 ```bash
 # Validate all schemas against JSON Schema draft 2020-12
-ajv validate -s schemas/base/base-metadata.schema.json -d examples/tier1-ask-user-question.json
+ajv validate --spec=draft2020 --strict=false -s schemas/base/base-metadata.schema.json -d examples/tier1-ask-user-question.json
 
 # Validate telemetry extension compatibility
-ajv validate -s schemas/telemetry/unified-activity-extensions.schema.json
+ajv validate --spec=draft2020 --strict=false -s schemas/telemetry/unified-activity-extensions.schema.json
 
 # Run all validations
-for schema in schemas/**/*.schema.json; do ajv compile -s "$schema"; done
+for schema in schemas/**/*.schema.json; do ajv compile --spec=draft2020 --strict=false -s "$schema"; done
 ```
 
 ---

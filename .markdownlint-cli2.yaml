@@ -1,7 +1,14 @@
 config:
   default: true
   MD013: false  # line length — disabled for spec prose
+  MD060: false  # table-column-style — compact pipes are intentional, used consistently
 ignores:
   - "node_modules/**"
-  - "CHANGELOG.md"
+  - ".git/**"
+  - ".github/**"
+  - ".claude/**"
   - ".claude-tmp/**"
+  - ".beads/**"
+  - "dist/**"
+  - "CHANGELOG.md"
+  - "CLAUDE.md"

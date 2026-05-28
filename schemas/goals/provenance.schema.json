@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "provenance.schema.json",
-  "title": "DGM Provenance",
+  "title": "ATS Provenance",
   "description": "Caller identity chain for tool call traceability: session → agent → skill/hook → tool. Present on all tiers.",
   "type": "object",
   "properties": {
