@@ -2,7 +2,7 @@
 # title: blast-radius pulse — determinism test suite
 # description: |
 #   Enumerates every seed relationship in conformance/affects.json (BR-001
-#   through BR-009) plus the empty-diff baseline plus the
+#   through BR-013) plus the empty-diff baseline plus the
 #   commit_footer_actions_done coverage matrix plus sub-target gating.
 #
 #   The matrix is loaded from conformance/affects.json exactly as in
@@ -446,4 +446,100 @@ test_mixed_verifiable_and_unverifiable_errors if {
 	result.verdict == "blocked"
 	result.errors == 1
 	result.warnings == 1
+}
+
+# ---------------------------------------------------------------------------
+# BR-010 — script edits surface an advisory (warning severity).
+# ---------------------------------------------------------------------------
+
+test_br010_fires_on_script_edit_as_warning if {
+	# BR-010 is verifiable=true at warning severity — fires but does not block.
+	result := blast_radius.result with input as _input(
+		["scripts/pulse.sh"], {}, [],
+	)
+	"BR-010-scripts-coverage" in _fired_ids(result)
+	result.verdict == "owed"
+	result.errors == 0
+}
+
+test_br010_clears_when_actions_done if {
+	result := blast_radius.result with input as _input(
+		["scripts/pulse.sh"], {},
+		[
+			"BR-010-scripts-coverage-1",
+			"BR-010-scripts-coverage-2",
+		],
+	)
+	result.verdict == "clear"
+}
+
+# ---------------------------------------------------------------------------
+# BR-011 — affects-manifest edits require test coverage and doc update (error).
+# ---------------------------------------------------------------------------
+
+test_br011_fires_on_affects_manifest_edit if {
+	# BR-011 is severity=error, verifiable=true — fires and blocks.
+	result := blast_radius.result with input as _input(
+		["conformance/affects.json"], {}, [],
+	)
+	"BR-011-affects-manifest" in _fired_ids(result)
+	result.verdict == "blocked"
+	result.errors == 1
+}
+
+test_br011_clears_when_actions_done if {
+	result := blast_radius.result with input as _input(
+		["conformance/affects.json"], {},
+		[
+			"BR-011-affects-manifest-1",
+			"BR-011-affects-manifest-2",
+		],
+	)
+	result.verdict == "clear"
+}
+
+# ---------------------------------------------------------------------------
+# BR-012 — docs/agents/** edits surface an advisory (warning severity).
+# ---------------------------------------------------------------------------
+
+test_br012_fires_on_docs_agents_edit_as_warning if {
+	# BR-012 is verifiable=false — advisory regardless of severity.
+	result := blast_radius.result with input as _input(
+		["docs/agents/enforcement.md"], {}, [],
+	)
+	"BR-012-docs-agents-coverage" in _fired_ids(result)
+	result.verdict == "owed"
+	result.errors == 0
+}
+
+test_br012_clears_when_actions_done if {
+	result := blast_radius.result with input as _input(
+		["docs/agents/enforcement.md"], {},
+		["BR-012-docs-agents-coverage-1"],
+	)
+	result.verdict == "clear"
+}
+
+# ---------------------------------------------------------------------------
+# BR-013 — template/** edits surface an advisory (warning severity).
+# ---------------------------------------------------------------------------
+
+test_br013_fires_on_template_edit_as_warning if {
+	# BR-013 is verifiable=false — advisory regardless of severity. template/**
+	# also matches BR-008 (template/_files/**) for any path under template/_files/;
+	# use a path outside _files/ so only BR-013 fires.
+	result := blast_radius.result with input as _input(
+		["template/README.md"], {}, [],
+	)
+	"BR-013-template-coverage" in _fired_ids(result)
+	result.verdict == "owed"
+	result.errors == 0
+}
+
+test_br013_clears_when_actions_done if {
+	result := blast_radius.result with input as _input(
+		["template/README.md"], {},
+		["BR-013-template-coverage-1"],
+	)
+	result.verdict == "clear"
 }
