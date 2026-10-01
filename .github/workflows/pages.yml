@@ -22,7 +22,7 @@ jobs:
     timeout-minutes: 10
     steps:
       - name: Checkout
-        uses: actions/checkout@v6  # pin to SHA before release
+        uses: actions/checkout@v7  # pin to SHA before release
 
       - name: Configure Pages
         uses: actions/configure-pages@v6  # pin to SHA before release
