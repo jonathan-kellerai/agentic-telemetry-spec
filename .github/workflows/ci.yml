@@ -117,12 +117,12 @@ jobs:
   # Conformance: call the reusable kellerai-oss-template conformance workflow.
   # artifact_type = json-schema — matches the conformance policy data.json.
   # NOTE: kellerai-oss-template must be public before this job can run.
-  # Replace <PENDING-SHA> with the verified commit SHA of the template repo
-  # at release time (see OSS-PUBLICATION-STANDARD.md §2).
+  # Pinned to the verified commit SHA of the template repo at release time
+  # (91b051d120a3ae30afef0d5636ae80fcfdb2e63d; see OSS-PUBLICATION-STANDARD.md §2).
   # ---------------------------------------------------------------------------
   conformance:
     name: Conformance (kellerai OSS standard)
     needs: [ajv-validate, json-wellformed]
-    uses: jonathan-kellerai/kellerai-oss-template/.github/workflows/conformance.yml@<PENDING-SHA>
+    uses: jonathan-kellerai/kellerai-oss-template/.github/workflows/conformance.yml@91b051d120a3ae30afef0d5636ae80fcfdb2e63d
     with:
       artifact_type: json-schema

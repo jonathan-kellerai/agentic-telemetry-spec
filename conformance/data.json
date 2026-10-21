@@ -1,0 +1,123 @@
+{
+  "_schema_version": "1.0.0",
+  "schema": {
+    "required_files": [
+      "README.md",
+      "AGENTS.md",
+      "CLAUDE.md",
+      "LICENSE",
+      "NOTICE",
+      "CHANGELOG.md",
+      "CITATION.cff",
+      "CONTRIBUTING.md",
+      "SECURITY.md",
+      ".gitignore",
+      ".markdownlint-cli2.yaml",
+      "commitlint.config.js",
+      "lefthook.yml",
+      "conformance/affects.json",
+      "conformance/blast_radius.rego",
+      "conformance/blast_radius_test.rego",
+      "audit/blast-radius.jsonl",
+      "docs/adr/ADR-002-blast-radius-pulse.md"
+    ],
+    "required_dirs": [
+      ".github",
+      ".github/workflows",
+      ".github/ISSUE_TEMPLATE",
+      "docs",
+      "docs/agents",
+      "scripts",
+      "audit"
+    ],
+    "required_github_files": [
+      ".github/CODEOWNERS",
+      ".github/dependabot.yml",
+      ".github/PULL_REQUEST_TEMPLATE.md",
+      ".github/workflows/ci.yml",
+      ".github/workflows/commitlint.yml",
+      ".github/workflows/pages.yml",
+      ".github/ISSUE_TEMPLATE/config.yml",
+      ".github/workflows/validate-branch-name.yml",
+      ".github/workflows/validate-branch-tier.yml",
+      ".github/workflows/validate-linked-issue.yml",
+      ".github/workflows/trust-dial-gate.yml",
+      ".github/workflows/trust-dial-outcome.yml",
+      ".github/workflows/blast-radius-pulse.yml",
+      ".github/workflows/blast-radius-outcome.yml"
+    ],
+    "required_agent_docs": [
+      "docs/agents/conventions.md",
+      "docs/agents/citation.md",
+      "docs/agents/glossary.md",
+      "docs/agents/enforcement.md"
+    ],
+    "required_scripts": [
+      "scripts/check-sanitization.sh",
+      "scripts/pulse.sh"
+    ],
+    "artifact_types": [
+      "json-schema",
+      "markdown-spec",
+      "rego-policy",
+      "rag-config"
+    ],
+    "artifact_type_files": {
+      "json-schema": {
+        "default_dir": "schemas",
+        "primary_validator": "ajv"
+      },
+      "markdown-spec": {
+        "default_dir": "specs",
+        "primary_validator": "markdownlint"
+      },
+      "rego-policy": {
+        "default_dir": "conformance",
+        "primary_validator": "opa"
+      },
+      "rag-config": {
+        "default_dir": "configs",
+        "primary_validator": "ajv"
+      }
+    },
+    "forbidden_branches": [
+      "master"
+    ],
+    "gitignore_required_patterns": [
+      ".claude/",
+      ".claude-tmp/",
+      ".DS_Store"
+    ]
+  },
+  "content_assertions": {
+    "agents_md_max_lines": 150,
+    "claude_md_max_lines": 80,
+    "claude_md_first_content_line": "@AGENTS.md",
+    "readme_agents_footer_marker": "For agents"
+  },
+  "thresholds": {
+    "max_deny_entries": 200
+  },
+  "policy_integrity": {
+    "algorithm": "sha256",
+    "expected_digest": "9138a9387823a4a97cbb5fb1d8966cd774143b7924156a32060f5c109d5fdab9"
+  },
+  "trust_dial_manifest": {
+    "verdict_policy": "conformance/trust_dial.rego",
+    "verdict_data": "conformance/trust_dial_data.json",
+    "state_file": "audit/trust-dial-state.json",
+    "decision_trace": "audit/decision-trace.jsonl",
+    "gate_workflow": ".github/workflows/trust-dial-gate.yml",
+    "outcome_workflow": ".github/workflows/trust-dial-outcome.yml",
+    "default_tier": "Observed"
+  },
+  "blast_radius_manifest": {
+    "policy": "conformance/blast_radius.rego",
+    "manifest": "conformance/affects.json",
+    "test_suite": "conformance/blast_radius_test.rego",
+    "trace": "audit/blast-radius.jsonl",
+    "gate_workflow": ".github/workflows/blast-radius-pulse.yml",
+    "outcome_workflow": ".github/workflows/blast-radius-outcome.yml",
+    "scope_dirs": ["conformance/", "template/", "scripts/", "docs/agents/"]
+  }
+}

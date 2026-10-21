@@ -65,3 +65,75 @@ A reviewer who sees a convention in `README.md` that is absent from `docs/agents
 Every change that introduces new load-bearing vocabulary must, in the same pull request, add or
 update the relevant term in `docs/agents/glossary.md`.
 A reviewer who sees new vocabulary with no glossary entry should block the PR.
+
+## Conformance policy — deny families and policy integrity
+
+The `kellerai-oss-template` conformance workflow validates this repository's structure on every
+push and pull request. The policy source is `conformance/conformance.rego` in the template repo;
+`agentic-telemetry-spec` calls it via a pinned `uses:` SHA. The deny families are:
+
+| Rule name | Severity | Trigger condition |
+|-----------|----------|-------------------|
+| `data_sentinel` | error | `data.schema` absent — conformance manifest not loaded |
+| `required_file` | error | A path listed in `data.json:schema.required_files` is missing from the repo |
+| `required_dir` | error | A path listed in `data.json:schema.required_dirs` is missing |
+| `required_github_file` | error | A path in `data.json:schema.required_github_files` is missing |
+| `required_agent_doc` | error | A Tier-2 agent doc in `data.json:schema.required_agent_docs` is missing |
+| `required_script` | error | A script listed in `data.json:schema.required_scripts` is missing |
+| `artifact_type_known` | error | `input.artifact_type` is not in `data.json:schema.artifact_types` |
+| `artifact_dir` | error | The artifact type's default directory is absent |
+| `agents_md_length` | warning | `AGENTS.md` exceeds `data.json:content_assertions.agents_md_max_lines` (currently 150) |
+| `claude_md_length` | warning | `CLAUDE.md` exceeds `data.json:content_assertions.claude_md_max_lines` (currently 80) |
+| `claude_md_import` | error | `CLAUDE.md` first content line is not `@AGENTS.md` |
+| `readme_agent_footer` | warning | `README.md` is missing the `For agents` footer marker |
+| `gitignore_coverage` | error | `.gitignore` does not cover a pattern from `data.json:schema.gitignore_required_patterns` |
+| `forbidden_branch` | error | A branch name listed in `data.json:schema.forbidden_branches` (`master`) is present |
+| `primary_validator_wired` | warning | No CI workflow references the artifact type's primary validator |
+| `trust_dial_wired` | error | The trust-dial gate workflow is present but no CI step evaluates `data.conformance.trust_dial` |
+| `policy_integrity` | error | The live SHA-256 digest of `conformance/conformance.rego` does not match `data.json:policy_integrity.expected_digest` |
+| `policy_integrity_manifest` | error | `data.json:policy_integrity.expected_digest` is absent |
+| `affects_manifest_complete` | error | A file in the blast-radius pulse scope (`conformance/`, `template/`, `scripts/`, `docs/agents/`) is not reachable from any entry in `conformance/affects.json` |
+
+### Policy self-integrity mechanism
+
+`data.json:policy_integrity.expected_digest` pins the SHA-256 of `conformance/conformance.rego`.
+The `policy_integrity` deny rule fires whenever the live digest captured by
+`scripts/scan-repo-structure.sh` differs from the pinned value — detecting silent tampering.
+
+After any edit to `conformance/conformance.rego`, refreeze the digest before committing:
+
+```bash
+shasum -a 256 conformance/conformance.rego   # macOS
+sha256sum conformance/conformance.rego        # Linux
+```
+
+Update `conformance/data.json:policy_integrity.expected_digest` with the output hex string.
+Omit the filename — only the 64-character hex digest is stored.
+The digest and the doc update must land in the same commit (see `BR-001-conformance-rego` in
+`conformance/affects.json`).
+
+## Blast-radius pulse — affects manifest (BR-011)
+
+`conformance/affects.json` is the blast-radius pulse manifest. It declares cross-file
+relationships: when a file matching `when_changed` appears in a git diff, the pulse engine fires
+the entry, computes which `affects` globs are missing from the diff, and reports `required_actions`
+as owed.
+
+`BR-011-affects-manifest` (`conformance/affects.json:178-194`) is the self-referential entry that
+covers changes to the manifest itself. It has `severity: "error"` and `verifiable: true`, so any
+edit to `conformance/affects.json` with owed actions is a hard CI block.
+
+### Required actions when editing `conformance/affects.json`
+
+1. **BR-011-affects-manifest-1** — For each new or renamed entry, add a positive test case
+   (verifies the entry fires) and a cleared test case (verifies all actions DONE yields
+   `verdict == "clear"`) in `conformance/blast_radius_test.rego`. Match the style of existing
+   test blocks (see the `test_br011_fires_on_affects_manifest_edit` /
+   `test_br011_clears_when_actions_done` pair added in this rollout).
+
+2. **BR-011-affects-manifest-2** — Document the new or changed entry in this file
+   (`docs/agents/enforcement.md`) — rule name, severity, `verifiable` flag, trigger condition,
+   and the required-action IDs.
+
+Both actions must be declared in the commit message footer as `Pulse-Action: BR-011-affects-manifest-1 DONE`
+and `Pulse-Action: BR-011-affects-manifest-2 DONE`, or the pre-commit hook rejects the commit.
